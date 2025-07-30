@@ -6,182 +6,210 @@
     <title>ระบบเตรียมข้อมูลส่ง SMS - โรงพยาบาลสัตว์สุราษฏร์ธานี</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: 'Sarabun', sans-serif; }
-        .bg-pastel-green { background-color: #e8f5e8; }
-        .bg-green-pastel { background-color: #c8e6c9; }
-        .text-green-dark { color: #2e7d32; }
-        .border-green-pastel { border-color: #a5d6a7; }
-        .hover-green:hover { background-color: #d1f0d1; }
+        body { font-family: 'Sarabun', sans-serif; background-color: #f0f4f8; }
+        .card { background-color: #ffffff; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.1); border: 1px solid #e5e7eb; }
+        .form-input {
+            width: 100%;
+            border-radius: 0.75rem;
+            border: 1px solid #d1d5db;
+            padding: 0.75rem 1rem 0.75rem 2.75rem; /* Add padding for icon */
+            transition: all 0.3s;
+        }
+        .form-input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            outline: none;
+        }
+        .input-with-icon { position: relative; }
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
         .swal2-popup { font-family: 'Sarabun', sans-serif; }
     </style>
 </head>
-<body class="bg-pastel-green min-h-screen">
+<body class="min-h-screen">
     <!-- Header -->
-    <header class="bg-white shadow-lg border-b-4 border-green-pastel">
-        <div class="container mx-auto px-6 py-4">
-            <h1 class="text-3xl font-bold text-green-dark text-center">
-                🏥 ระบบเตรียมข้อมูลส่ง SMS
-            </h1>
-            <p class="text-center text-gray-600 mt-2">โรงพยาบาลสัตว์สุราษฏร์ธานี (v.GoogleSheets)</p>
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-4 sm:px-6 py-4">
+            <div class="flex items-center justify-center">
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">
+                    <i class="fa-solid fa-paw text-blue-600"></i>
+                    ระบบแจ้งเตือน SMS โรงพยาบาลสัตว์
+                </h1>
+            </div>
         </div>
     </header>
 
-    <div class="container mx-auto px-6 py-8 max-w-6xl">
-        <!-- SMS Data Entry Form -->
-        <div class="bg-white rounded-xl shadow-lg p-6 border-2 border-green-pastel">
-            <h2 class="text-2xl font-semibold text-green-dark mb-6 flex items-center">
-                📱 เตรียมข้อมูลส่ง SMS
-            </h2>
+    <main class="container mx-auto px-4 sm:px-6 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
-            <form id="smsForm" class="space-y-6">
-                <!-- Date Input -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        📅 วันที่ส่ง <span class="text-red-500">*</span>
-                    </label>
-                    <input type="date" id="sendDate" name="sendDate" required
-                           class="w-full px-4 py-3 border-2 border-green-pastel rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent">
-                </div>
-
-                <!-- Phone Number -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        📞 เบอร์ติดต่อ (10 หลัก) <span class="text-red-500">*</span>
-                    </label>
-                    <input type="tel" id="phoneNumber" name="phoneNumber" required maxlength="10" pattern="[0-9]{10}"
-                           placeholder="0812345678"
-                           class="w-full px-4 py-3 border-2 border-green-pastel rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent">
-                </div>
-
-                <!-- Pet Name -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        🐕 ชื่อสัตว์ <span class="text-red-500">*</span>
-                    </label>
-                    <input type="text" id="petName" name="petName" required
-                           placeholder="ชื่อสัตว์เลี้ยง"
-                           class="w-full px-4 py-3 border-2 border-green-pastel rounded-lg focus:ring-2 focus:ring-green-400 focus:border-transparent">
-                </div>
-
-                <!-- Appointment Type -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-4">
-                        💉 ประเภทนัด <span class="text-red-500">*</span>
-                    </label>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto border-2 border-green-pastel rounded-lg p-4">
-                        <label class="flex items-start space-x-3 p-3 rounded-lg hover-green cursor-pointer"><input type="radio" name="appointmentType" value="ฉีดวัคซีนรวมสุนัขและวัคซีนป้องกันโรคพิษสุนัขบ้า คำแนะนำ : งดอาบน้ำ 7 วัน" required class="mt-1"><span class="text-sm">ฉีดวัคซีนรวมสุนัخและวัคซีนป้องกันโรคพิษสุนัขบ้า</span></label>
-                        <label class="flex items-start space-x-3 p-3 rounded-lg hover-green cursor-pointer"><input type="radio" name="appointmentType" value="ฉีดวัคซีนรวมสุนัข คำแนะนำ : งดอาบน้ำ 7 วัน" required class="mt-1"><span class="text-sm">ฉีดวัคซีนรวมสุนัข</span></label>
-                        <label class="flex items-start space-x-3 p-3 rounded-lg hover-green cursor-pointer"><input type="radio" name="appointmentType" value="ฉีดวัคซีนรวมแมว คำแนะนำ : งดอาบน้ำ 7 วัน" required class="mt-1"><span class="text-sm">ฉีดวัคซีนรวมแมว</span></label>
-                        <label class="flex items-start space-x-3 p-3 rounded-lg hover-green cursor-pointer"><input type="radio" name="appointmentType" value="ฉีดวัคซีนรวมแมวและวัคซีนป้องกันโรคพิษสุนัขบ้า คำแนะนำ : งดอาบน้ำ 7 วัน" required class="mt-1"><span class="text-sm">ฉีดวัคซีนรวมแมวและวัคซีนป้องกันโรคพิษสุนัขบ้า</span></label>
-                        <label class="flex items-start space-x-3 p-3 rounded-lg hover-green cursor-pointer"><input type="radio" name="appointmentType" value="ฉีดวัคซีนป้องกันโรคพิษสุนัขบ้า คำแนะนำ : งดอาบน้ำ 7 วัน" required class="mt-1"><span class="text-sm">ฉีดวัคซีนป้องกันโรคพิษสุนัขบ้า</span></label>
-                        <label class="flex items-start space-x-3 p-3 rounded-lg hover-green cursor-pointer"><input type="radio" name="appointmentType" value="ฉีดวัคซีนลิวคีเมีย คำแนะนำ : งดอาบน้ำ 7 วัน" required class="mt-1"><span class="text-sm">ฉีดวัคซีนลิวคีเมีย</span></label>
-                        <label class="flex items-start space-x-3 p-3 rounded-lg hover-green cursor-pointer"><input type="radio" name="appointmentType" value="ตรวจเลือดหาเชื้อไวรัสก่อนฉีดวัคซีนลิวคีเมีย คำแนะนำ : งดอาบน้ำ 7 วัน" required class="mt-1"><span class="text-sm">ตรวจเลือดหาเชื้อไวรัสก่อนฉีดวัคซีนลิวคีเมีย</span></label>
-                        <label class="flex items-start space-x-3 p-3 rounded-lg hover-green cursor-pointer"><input type="radio" name="appointmentType" value="ฉีดวัคซีน คำแนะนำ : งดอาบน้ำ 7 วัน" required class="mt-1"><span class="text-sm">ฉีดวัคซีน</span></label>
-                        <label class="flex items-start space-x-3 p-3 rounded-lg hover-green cursor-pointer"><input type="radio" name="appointmentType" value="ดูอาการต่อเนื่อง" required class="mt-1"><span class="text-sm">ดูอาการต่อเนื่อง</span></label>
-                        <label class="flex items-start space-x-3 p-3 rounded-lg hover-green cursor-pointer"><input type="radio" name="appointmentType" value="รับยาต่อเนื่อง" required class="mt-1"><span class="text-sm">รับยาต่อเนื่อง</span></label>
-                        <label class="flex items-start space-x-3 p-3 rounded-lg hover-green cursor-pointer"><input type="radio" name="appointmentType" value="ฉีดยา" required class="mt-1"><span class="text-sm">ฉีดยา</span></label>
-                        <label class="flex items-start space-x-3 p-3 rounded-lg hover-green cursor-pointer"><input type="radio" name="appointmentType" value="ฉีดยาคุม" required class="mt-1"><span class="text-sm">ฉีดยาคุม</span></label>
-                        <label class="flex items-start space-x-3 p-3 rounded-lg hover-green cursor-pointer"><input type="radio" name="appointmentType" value="ตัดไหม" required class="mt-1"><span class="text-sm">ตัดไหม</span></label>
-                        <label class="flex items-start space-x-3 p-3 rounded-lg hover-green cursor-pointer"><input type="radio" name="appointmentType" value="ตรวจเลือด" required class="mt-1"><span class="text-sm">ตรวจเลือด</span></label>
-                        <label class="flex items-start space-x-3 p-3 rounded-lg hover-green cursor-pointer"><input type="radio" name="appointmentType" value="ครบรอบกินยา NEXGARD / NEXGARD SPECTRA ต่อเนื่อง" required class="mt-1"><span class="text-sm">ครบรอบกินยา NEXGARD / NEXGARD SPECTRA ต่อเนื่อง</span></label>
-                        <label class="flex items-start space-x-3 p-3 rounded-lg hover-green cursor-pointer"><input type="radio" name="appointmentType" value="ครบรอบกินยา BRAVECTO ต่อเนื่อง" required class="mt-1"><span class="text-sm">ครบรอบกินยา BRAVECTO ต่อเนื่อง</span></label>
-                        <label class="flex items-start space-x-3 p-3 rounded-lg hover-green cursor-pointer"><input type="radio" name="appointmentType" value="ครบรอบหยอดยา ADVOCATE / NEXGARD COMBO ต่อเนื่อง คำแนะนำ : ก่อนและหลังหยอดยางดอาบน้ำ 2 วัน" required class="mt-1"><span class="text-sm">ครบรอบหยอดยา ADVOCATE / NEXGARD COMBO ต่อเนื่อง</span></label>
-                        <label class="flex items-start space-x-3 p-3 rounded-lg hover-green cursor-pointer"><input type="radio" name="appointmentType" value="ครบรอบหยอดยาเห็บหมัด ต่อเนื่อง คำแนะนำ : ก่อนและหลังหยอดยางดอาบน้ำ 2 วัน" required class="mt-1"><span class="text-sm">ครบรอบหยอดยาเห็บหมัด ต่อเนื่อง</span></label>
-                        <label class="flex items-start space-x-3 p-3 rounded-lg hover-green cursor-pointer"><input type="radio" name="appointmentType" value="ทำหมัน" required class="mt-1"><span class="text-sm">ทำหมัน</span></label>
-                        <label class="flex items-start space-x-3 p-3 rounded-lg hover-green cursor-pointer"><input type="radio" name="appointmentType" value="ทำแผล" required class="mt-1"><span class="text-sm">ทำแผล</span></label>
+            <!-- SMS Data Entry Form -->
+            <div class="card p-6 lg:p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fa-solid fa-file-pen mr-3 text-blue-600"></i>
+                    สร้างข้อความแจ้งเตือน
+                </h2>
+                
+                <form id="smsForm" class="space-y-6">
+                    <!-- Pet Name -->
+                    <div>
+                        <label for="petName" class="block text-sm font-semibold text-gray-700 mb-2">ชื่อสัตว์เลี้ยง</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-dog input-icon"></i>
+                            <input type="text" id="petName" name="petName" required placeholder="เช่น น้องนำโชค" class="form-input">
+                        </div>
                     </div>
-                </div>
 
-                <!-- Submit Button -->
-                <div class="pt-6">
-                    <button type="submit"
-                            class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-6 rounded-lg transition duration-300 transform hover:scale-105 shadow-lg">
-                        💾 บันทึกข้อมูล
-                    </button>
-                </div>
-            </form>
-        </div>
+                    <!-- Phone Number -->
+                    <div>
+                        <label for="phoneNumber" class="block text-sm font-semibold text-gray-700 mb-2">เบอร์ติดต่อ (10 หลัก)</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-mobile-screen-button input-icon"></i>
+                            <input type="tel" id="phoneNumber" name="phoneNumber" required maxlength="10" pattern="[0-9]{10}" placeholder="0812345678" class="form-input">
+                        </div>
+                    </div>
 
-        <!-- Dashboard Section -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mt-8 border-2 border-green-pastel">
-            <h2 class="text-2xl font-semibold text-green-dark mb-6 flex items-center">
-                📊 แดชบอร์ด - ข้อมูลล่าสุด
-            </h2>
-            <div id="dashboard" class="space-y-4">
-                <div class="text-center py-8">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
-                    <p class="text-gray-600">กำลังโหลดข้อมูล...</p>
+                    <!-- Appointment Type -->
+                    <div>
+                        <label for="appointmentType" class="block text-sm font-semibold text-gray-700 mb-2">ประเภทนัดหมาย</label>
+                        <div class="input-with-icon">
+                             <i class="fa-solid fa-syringe input-icon"></i>
+                            <select id="appointmentType" name="appointmentType" required class="form-input appearance-none">
+                                <option value="" disabled selected>กรุณาเลือกประเภทนัด...</option>
+                                <option value="ฉีดวัคซีนรวมสุนัขและวัคซีนป้องกันโรคพิษสุนัขบ้า คำแนะนำ : งดอาบน้ำ 7 วัน">ฉีดวัคซีนรวมสุนัขและพิษสุนัขบ้า</option>
+                                <option value="ฉีดวัคซีนรวมสุนัข คำแนะนำ : งดอาบน้ำ 7 วัน">ฉีดวัคซีนรวมสุนัข</option>
+                                <option value="ฉีดวัคซีนรวมแมวและวัคซีนป้องกันโรคพิษสุนัขบ้า คำแนะนำ : งดอาบน้ำ 7 วัน">ฉีดวัคซีนรวมแมวและพิษสุนัขบ้า</option>
+                                <option value="ฉีดวัคซีนรวมแมว คำแนะนำ : งดอาบน้ำ 7 วัน">ฉีดวัคซีนรวมแมว</option>
+                                <option value="ฉีดวัคซีนป้องกันโรคพิษสุนัขบ้า คำแนะนำ : งดอาบน้ำ 7 วัน">ฉีดวัคซีนป้องกันโรคพิษสุนัขบ้า</option>
+                                <option value="ฉีดวัคซีนลิวคีเมีย คำแนะนำ : งดอาบน้ำ 7 วัน">ฉีดวัคซีนลิวคีเมีย</option>
+                                <option value="ตรวจเลือดหาเชื้อไวรัสก่อนฉีดวัคซีนลิวคีเมีย คำแนะนำ : งดอาบน้ำ 7 วัน">ตรวจเลือดก่อนฉีดวัคซีนลิวคีเมีย</option>
+                                <option value="ฉีดวัคซีน คำแนะนำ : งดอาบน้ำ 7 วัน">ฉีดวัคซีน (ทั่วไป)</option>
+                                <option value="ดูอาการต่อเนื่อง">ดูอาการต่อเนื่อง</option>
+                                <option value="รับยาต่อเนื่อง">รับยาต่อเนื่อง</option>
+                                <option value="ฉีดยา">ฉีดยา</option>
+                                <option value="ฉีดยาคุม">ฉีดยาคุม</option>
+                                <option value="ตัดไหม">ตัดไหม</option>
+                                <option value="ตรวจเลือด">ตรวจเลือด</option>
+                                <option value="ทำหมัน">ทำหมัน</option>
+                                <option value="ทำแผล">ทำแผล</option>
+                                <option value="ครบรอบกินยา NEXGARD / NEXGARD SPECTRA ต่อเนื่อง">ครบรอบกินยา NEXGARD / SPECTRA</option>
+                                <option value="ครบรอบกินยา BRAVECTO ต่อเนื่อง">ครบรอบกินยา BRAVECTO</option>
+                                <option value="ครบรอบหยอดยา ADVOCATE / NEXGARD COMBO ต่อเนื่อง คำแนะนำ : ก่อนและหลังหยอดยางดอาบน้ำ 2 วัน">ครบรอบหยอดยา ADVOCATE / COMBO</option>
+                                <option value="ครบรอบหยอดยาเห็บหมัด ต่อเนื่อง คำแนะนำ : ก่อนและหลังหยอดยางดอาบน้ำ 2 วัน">ครบรอบหยอดยาเห็บหมัด</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Date Input -->
+                    <div>
+                        <label for="sendDate" class="block text-sm font-semibold text-gray-700 mb-2">วันที่ส่ง SMS</label>
+                         <div class="input-with-icon">
+                            <i class="fa-solid fa-calendar-days input-icon"></i>
+                            <input type="date" id="sendDate" name="sendDate" required class="form-input">
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="pt-4">
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-paper-plane mr-2"></i>
+                            บันทึกและเตรียมส่ง
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div class="card p-6 lg:p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                     <i class="fa-solid fa-clock-rotate-left mr-3 text-blue-600"></i>
+                    รายการล่าสุด
+                </h2>
+                <div id="dashboard" class="space-y-4">
+                    <div class="text-center py-8">
+                        <i class="fa-solid fa-spinner fa-spin text-4xl text-blue-500"></i>
+                        <p class="text-gray-500 mt-4">กำลังโหลดข้อมูล...</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="bg-green-600 text-white py-6 mt-12">
-        <div class="container mx-auto px-6 text-center">
-            <p class="text-lg font-medium">🏥 โรงพยาบาลสัตว์สุราษฏร์ธานี 2568</p>
-        </div>
-    </footer>
+    </main>
 
     <script>
         // --- CONFIGURATION ---
-        // URL ของ Google Apps Script สำหรับบันทึกข้อมูล
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwtzEUk2yuCCoxrd53YRXfgN9cP6rtr3ixeLr9iD7aRNjuvx9TMk76Rq50hPpvYuyV/exec"; 
-        
-        // URL ของ Google Sheet สำหรับแสดงผล (gviz)
         const GVIZ_URL = "https://docs.google.com/spreadsheets/d/1UltCx_5u19F675ELpi7OUAxQJFh6UkbD6Qq__jQoL5Q/gviz/tq?tqx=out:json&sheet=DATA";
 
-        // Convert Gregorian date to Buddhist Era
         function convertToBuddhistEra(gregorianDate) {
+            if (!gregorianDate) return '';
             const date = new Date(gregorianDate);
             const buddhistYear = date.getFullYear() + 543;
             const day = date.getDate().toString().padStart(2, '0');
             const month = (date.getMonth() + 1).toString().padStart(2, '0');
             return `${day}/${month}/${buddhistYear}`;
         }
+        
+        function formatRelativeTime(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            
+            let interval = seconds / 31536000;
+            if (interval > 1) return `เมื่อ ${Math.floor(interval)} ปีที่แล้ว`;
+            interval = seconds / 2592000;
+            if (interval > 1) return `เมื่อ ${Math.floor(interval)} เดือนที่แล้ว`;
+            interval = seconds / 86400;
+            if (interval > 1) return `เมื่อ ${Math.floor(interval)} วันที่แล้ว`;
+            interval = seconds / 3600;
+            if (interval > 1) return `เมื่อ ${Math.floor(interval)} ชั่วโมงที่แล้ว`;
+            interval = seconds / 60;
+            if (interval > 1) return `เมื่อ ${Math.floor(interval)} นาทีที่แล้ว`;
+            return "เมื่อสักครู่";
+        }
 
-        // Load dashboard data from Google Sheet
+
         async function loadDashboard() {
             const dashboard = document.getElementById('dashboard');
-            if (!GVIZ_URL || GVIZ_URL.includes("YOUR_GOOGLE_SHEET_GVIZ_URL")) {
-                dashboard.innerHTML = '<p class="text-center text-orange-500 py-8">กรุณาตั้งค่า GVIZ_URL ในโค้ดก่อน</p>';
-                return;
-            }
             try {
                 const response = await fetch(GVIZ_URL);
                 const text = await response.text();
-                // This parsing logic is specific to the Google Visualization API JSONP response format
                 const jsonData = JSON.parse(text.substr(47).slice(0, -2));
                 
                 const rows = jsonData.table.rows;
                 
                 if (rows.length === 0) {
-                    dashboard.innerHTML = '<p class="text-center text-gray-500 py-8">ยังไม่มีข้อมูล</p>';
+                    dashboard.innerHTML = '<div class="text-center py-8"><i class="fa-solid fa-folder-open text-4xl text-gray-300"></i><p class="text-gray-500 mt-4">ยังไม่มีข้อมูลในระบบ</p></div>';
                     return;
                 }
                 
-                // Get last 5 records and reverse them to show newest first
                 const recentRows = rows.slice(-5).reverse();
                 
                 let html = '<div class="space-y-3">';
-                recentRows.forEach((row, index) => {
-                    const date = row.c[0]?.v || 'ไม่ระบุ';
-                    const phone = row.c[1]?.v || 'ไม่ระบุ';
-                    const petName = row.c[2]?.v || 'ไม่ระบุ';
-                    const appointmentType = row.c[3]?.v || 'ไม่ระบุ';
+                recentRows.forEach((row) => {
+                    const date = row.c[0]?.v || 'N/A';
+                    const phone = row.c[1]?.v || 'N/A';
+                    const petName = row.c[2]?.v || 'N/A';
+                    const appointmentType = row.c[3]?.v || 'N/A';
+                    const timestamp = row.c[4]?.v || null;
                     
                     html += `
-                        <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                        <div class="border border-gray-200 rounded-xl p-4 transition-all hover:shadow-md hover:border-blue-500">
                             <div class="flex justify-between items-start">
-                                <div class="flex-1">
-                                    <p class="font-semibold text-green-dark">🐾 ${petName}</p>
-                                    <p class="text-sm text-gray-600">📞 ${phone}</p>
-                                    <p class="text-sm text-gray-600">📅 ${date}</p>
-                                    <p class="text-sm text-gray-700 mt-1">${appointmentType.split(' คำแนะนำ')[0]}</p>
-                                </div>
-                                <span class="bg-green-200 text-green-800 text-xs px-2 py-1 rounded-full">ล่าสุด</span>
+                                <p class="font-bold text-lg text-gray-800">${petName}</p>
+                                <span class="text-xs text-gray-500">${formatRelativeTime(timestamp)}</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-2"><i class="fa-solid fa-syringe w-4 mr-1 text-gray-400"></i> ${appointmentType.split(' คำแนะนำ')[0]}</p>
+                            <div class="flex text-sm text-gray-600 mt-1">
+                                <p class="mr-4"><i class="fa-solid fa-mobile-screen-button w-4 mr-1 text-gray-400"></i> ${phone}</p>
+                                <p><i class="fa-solid fa-calendar-days w-4 mr-1 text-gray-400"></i> ${date}</p>
                             </div>
                         </div>
                     `;
@@ -190,24 +218,13 @@
                 dashboard.innerHTML = html;
             } catch (error) {
                 console.error('Error loading dashboard:', error);
-                dashboard.innerHTML = '<p class="text-center text-red-500 py-8">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>';
+                dashboard.innerHTML = '<div class="text-center py-8"><i class="fa-solid fa-circle-exclamation text-4xl text-red-400"></i><p class="text-red-500 mt-4">เกิดข้อผิดพลาดในการโหลดข้อมูล</p></div>';
             }
         }
 
-        // Handle form submission
         document.getElementById('smsForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            if (!SCRIPT_URL || SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT_URL")) {
-                 Swal.fire({
-                    icon: 'error',
-                    title: 'ยังไม่ได้ตั้งค่า!',
-                    text: 'กรุณาตั้งค่า SCRIPT_URL ในโค้ดก่อนทำการบันทึก',
-                    confirmButtonColor: '#ef4444'
-                });
-                return;
-            }
-
             const formData = new FormData(this);
             const data = {
                 sendDate: convertToBuddhistEra(formData.get('sendDate')),
@@ -217,13 +234,13 @@
             };
 
             Swal.fire({
-                title: 'กำลังบันทึกข้อมูล...',
-                html: 'กรุณารอสักครู่',
+                title: 'กำลังบันทึกข้อมูล',
+                text: 'กรุณารอสักครู่...',
                 allowOutsideClick: false,
                 didOpen: () => { Swal.showLoading(); }
             });
 
-            const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+            const callbackName = 'jsonp_callback_' + Date.now();
             window[callbackName] = function(response) {
                 document.head.removeChild(script);
                 delete window[callbackName];
@@ -233,35 +250,29 @@
                         icon: 'success',
                         title: 'บันทึกสำเร็จ!',
                         text: 'ข้อมูลได้ถูกบันทึกเรียบร้อยแล้ว',
-                        confirmButtonColor: '#10b981'
+                        timer: 2000,
+                        showConfirmButton: false
                     }).then(() => {
                         document.getElementById('smsForm').reset();
                         document.getElementById('sendDate').valueAsDate = new Date();
-                        loadDashboard(); // Refresh dashboard
+                        loadDashboard();
                     });
                 } else {
                     handleError(new Error(response.error || 'Unknown error from Apps Script'));
                 }
             };
 
-            const params = new URLSearchParams({
-                callback: callbackName,
-                ...data
-            });
-
+            const params = new URLSearchParams({ callback: callbackName, ...data });
             const script = document.createElement('script');
             script.src = `${SCRIPT_URL}?${params.toString()}`;
-            script.onerror = () => handleError(new Error('Script loading failed. Check SCRIPT_URL and CORS settings.'));
+            script.onerror = () => handleError(new Error('Script loading failed.'));
             document.head.appendChild(script);
             
-            // Timeout to prevent infinite loading
             setTimeout(() => {
                 if (window[callbackName]) {
-                    document.head.removeChild(script);
-                    delete window[callbackName];
-                    handleError(new Error('Request timed out. Check your Apps Script deployment.'));
+                    handleError(new Error('Request timed out.'));
                 }
-            }, 10000); // 10 seconds
+            }, 10000);
         });
 
         function handleError(error) {
@@ -269,20 +280,15 @@
             Swal.fire({
                 icon: 'error',
                 title: 'เกิดข้อผิดพลาด!',
-                text: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาตรวจสอบการตั้งค่าและลองใหม่อีกครั้ง',
-                confirmButtonColor: '#ef4444'
+                text: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง',
             });
         }
 
-        // Phone number validation
         document.getElementById('phoneNumber').addEventListener('input', function(e) {
             e.target.value = e.target.value.replace(/[^0-9]/g, '');
         });
 
-        // --- INITIAL LOAD ---
-        // Set default date to today
         document.getElementById('sendDate').valueAsDate = new Date();
-        // Load dashboard on page load
         loadDashboard();
     </script>
 </body>
