@@ -12,38 +12,24 @@
         body { font-family: 'Sarabun', sans-serif; background-color: #f0f4f8; }
         .card { background-color: #ffffff; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.1); border: 1px solid #e5e7eb; }
         .form-input {
-            width: 100%;
-            border-radius: 0.75rem;
-            border: 1px solid #d1d5db;
-            padding: 0.75rem 1rem 0.75rem 2.75rem; /* Add padding for icon */
-            transition: all 0.3s;
+            width: 100%; border-radius: 0.75rem; border: 1px solid #d1d5db;
+            padding: 0.75rem 1rem 0.75rem 2.75rem; transition: all 0.3s;
         }
-        .form-input:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-            outline: none;
-        }
+        .form-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); outline: none; }
         .input-with-icon { position: relative; }
-        .input-icon {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #9ca3af;
-        }
+        .input-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #9ca3af; }
         .swal2-popup { font-family: 'Sarabun', sans-serif; }
+        .action-btn { background-color: transparent; border: none; cursor: pointer; padding: 0.5rem; border-radius: 50%; transition: background-color 0.2s; }
+        .action-btn:hover { background-color: #e5e7eb; }
     </style>
 </head>
 <body class="min-h-screen">
     <!-- Header -->
     <header class="bg-white shadow-md">
         <div class="container mx-auto px-4 sm:px-6 py-4">
-            <div class="flex items-center justify-center">
-                <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">
-                    <i class="fa-solid fa-paw text-blue-600"></i>
-                    ระบบแจ้งเตือน SMS โรงพยาบาลสัตว์
-                </h1>
-            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 text-center">
+                <i class="fa-solid fa-paw text-blue-600"></i> ระบบแจ้งเตือน SMS โรงพยาบาลสัตว์
+            </h1>
         </div>
     </header>
 
@@ -52,35 +38,25 @@
             
             <!-- SMS Data Entry Form -->
             <div class="card p-6 lg:p-8">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <h2 id="form-title" class="text-2xl font-bold text-gray-800 mb-6 flex items-center transition-all">
                     <i class="fa-solid fa-file-pen mr-3 text-blue-600"></i>
                     สร้างข้อความแจ้งเตือน
                 </h2>
                 
                 <form id="smsForm" class="space-y-6">
-                    <!-- Pet Name -->
+                    <input type="hidden" id="editRowNumber" name="editRowNumber">
+                    <!-- Form fields -->
                     <div>
                         <label for="petName" class="block text-sm font-semibold text-gray-700 mb-2">ชื่อสัตว์เลี้ยง</label>
-                        <div class="input-with-icon">
-                            <i class="fa-solid fa-dog input-icon"></i>
-                            <input type="text" id="petName" name="petName" required placeholder="เช่น น้องนำโชค" class="form-input">
-                        </div>
+                        <div class="input-with-icon"><i class="fa-solid fa-dog input-icon"></i><input type="text" id="petName" name="petName" required placeholder="เช่น น้องนำโชค" class="form-input"></div>
                     </div>
-
-                    <!-- Phone Number -->
                     <div>
                         <label for="phoneNumber" class="block text-sm font-semibold text-gray-700 mb-2">เบอร์ติดต่อ (10 หลัก)</label>
-                        <div class="input-with-icon">
-                            <i class="fa-solid fa-mobile-screen-button input-icon"></i>
-                            <input type="tel" id="phoneNumber" name="phoneNumber" required maxlength="10" pattern="[0-9]{10}" placeholder="0812345678" class="form-input">
-                        </div>
+                        <div class="input-with-icon"><i class="fa-solid fa-mobile-screen-button input-icon"></i><input type="tel" id="phoneNumber" name="phoneNumber" required maxlength="10" pattern="[0-9]{10}" placeholder="0812345678" class="form-input"></div>
                     </div>
-
-                    <!-- Appointment Type -->
                     <div>
                         <label for="appointmentType" class="block text-sm font-semibold text-gray-700 mb-2">ประเภทนัดหมาย</label>
-                        <div class="input-with-icon">
-                             <i class="fa-solid fa-syringe input-icon"></i>
+                        <div class="input-with-icon"><i class="fa-solid fa-syringe input-icon"></i>
                             <select id="appointmentType" name="appointmentType" required class="form-input appearance-none">
                                 <option value="" disabled selected>กรุณาเลือกประเภทนัด...</option>
                                 <option value="ฉีดวัคซีนรวมสุนัขและวัคซีนป้องกันโรคพิษสุนัขบ้า คำแนะนำ : งดอาบน้ำ 7 วัน">ฉีดวัคซีนรวมสุนัขและพิษสุนัขบ้า</option>
@@ -106,21 +82,18 @@
                             </select>
                         </div>
                     </div>
-
-                    <!-- Date Input -->
                     <div>
                         <label for="sendDate" class="block text-sm font-semibold text-gray-700 mb-2">วันที่ส่ง SMS</label>
-                         <div class="input-with-icon">
-                            <i class="fa-solid fa-calendar-days input-icon"></i>
-                            <input type="date" id="sendDate" name="sendDate" required class="form-input">
-                        </div>
+                         <div class="input-with-icon"><i class="fa-solid fa-calendar-days input-icon"></i><input type="date" id="sendDate" name="sendDate" required class="form-input"></div>
                     </div>
 
-                    <!-- Submit Button -->
-                    <div class="pt-4">
-                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center text-lg">
-                            <i class="fa-solid fa-paper-plane mr-2"></i>
-                            บันทึกและเตรียมส่ง
+                    <!-- Action Buttons -->
+                    <div id="form-actions" class="pt-4 grid grid-cols-2 gap-4">
+                        <button type="button" id="clearBtn" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-eraser mr-2"></i><span id="clearBtn-text">ล้างข้อมูล</span>
+                        </button>
+                        <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center text-lg">
+                            <i id="submitBtn-icon" class="fa-solid fa-paper-plane mr-2"></i><span id="submitBtn-text">บันทึก</span>
                         </button>
                     </div>
                 </form>
@@ -133,10 +106,7 @@
                     รายการล่าสุด
                 </h2>
                 <div id="dashboard" class="space-y-4">
-                    <div class="text-center py-8">
-                        <i class="fa-solid fa-spinner fa-spin text-4xl text-blue-500"></i>
-                        <p class="text-gray-500 mt-4">กำลังโหลดข้อมูล...</p>
-                    </div>
+                    <div class="text-center py-8"><i class="fa-solid fa-spinner fa-spin text-4xl text-blue-500"></i><p class="text-gray-500 mt-4">กำลังโหลดข้อมูล...</p></div>
                 </div>
             </div>
         </div>
@@ -147,6 +117,16 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwtzEUk2yuCCoxrd53YRXfgN9cP6rtr3ixeLr9iD7aRNjuvx9TMk76Rq50hPpvYuyV/exec"; 
         const GVIZ_URL = "https://docs.google.com/spreadsheets/d/1UltCx_5u19F675ELpi7OUAxQJFh6UkbD6Qq__jQoL5Q/gviz/tq?tqx=out:json&sheet=DATA";
 
+        const form = document.getElementById('smsForm');
+        const formTitle = document.getElementById('form-title');
+        const clearBtn = document.getElementById('clearBtn');
+        const clearBtnText = document.getElementById('clearBtn-text');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitBtnText = document.getElementById('submitBtn-text');
+        const submitBtnIcon = document.getElementById('submitBtn-icon');
+        const editRowNumberInput = document.getElementById('editRowNumber');
+
+        // --- HELPER FUNCTIONS ---
         function convertToBuddhistEra(gregorianDate) {
             if (!gregorianDate) return '';
             const date = new Date(gregorianDate);
@@ -155,62 +135,81 @@
             const month = (date.getMonth() + 1).toString().padStart(2, '0');
             return `${day}/${month}/${buddhistYear}`;
         }
+
+        function convertBuddhistToGregorian(buddhistDate) {
+            if (!buddhistDate || !buddhistDate.includes('/')) return '';
+            const parts = buddhistDate.split('/');
+            const day = parts[0];
+            const month = parts[1];
+            const buddhistYear = parseInt(parts[2], 10);
+            if (isNaN(buddhistYear)) return '';
+            const gregorianYear = buddhistYear - 543;
+            return `${gregorianYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        }
         
         function formatRelativeTime(dateString) {
             if (!dateString) return '';
             const date = new Date(dateString);
             const now = new Date();
             const seconds = Math.floor((now - date) / 1000);
-            
-            let interval = seconds / 31536000;
-            if (interval > 1) return `เมื่อ ${Math.floor(interval)} ปีที่แล้ว`;
-            interval = seconds / 2592000;
-            if (interval > 1) return `เมื่อ ${Math.floor(interval)} เดือนที่แล้ว`;
-            interval = seconds / 86400;
-            if (interval > 1) return `เมื่อ ${Math.floor(interval)} วันที่แล้ว`;
-            interval = seconds / 3600;
-            if (interval > 1) return `เมื่อ ${Math.floor(interval)} ชั่วโมงที่แล้ว`;
-            interval = seconds / 60;
-            if (interval > 1) return `เมื่อ ${Math.floor(interval)} นาทีที่แล้ว`;
+            if (seconds < 60) return "เมื่อสักครู่";
+            const intervals = {ปี: 31536000, เดือน: 2592000, วัน: 86400, ชั่วโมง: 3600, นาที: 60};
+            for (const [unit, secondsPerUnit] of Object.entries(intervals)) {
+                const interval = Math.floor(seconds / secondsPerUnit);
+                if (interval >= 1) return `เมื่อ ${interval} ${unit}ที่แล้ว`;
+            }
             return "เมื่อสักครู่";
         }
 
-
+        // --- DASHBOARD & DATA ---
         async function loadDashboard() {
             const dashboard = document.getElementById('dashboard');
             try {
                 const response = await fetch(GVIZ_URL);
                 const text = await response.text();
                 const jsonData = JSON.parse(text.substr(47).slice(0, -2));
+                const allRows = jsonData.table.rows;
                 
-                const rows = jsonData.table.rows;
-                
-                if (rows.length === 0) {
+                if (allRows.length === 0) {
                     dashboard.innerHTML = '<div class="text-center py-8"><i class="fa-solid fa-folder-open text-4xl text-gray-300"></i><p class="text-gray-500 mt-4">ยังไม่มีข้อมูลในระบบ</p></div>';
                     return;
                 }
                 
-                const recentRows = rows.slice(-5).reverse();
+                const recentRows = allRows.slice().reverse().slice(0, 10); // Show last 10
                 
                 let html = '<div class="space-y-3">';
                 recentRows.forEach((row) => {
-                    const date = row.c[0]?.v || 'N/A';
-                    const phone = row.c[1]?.v || 'N/A';
-                    const petName = row.c[2]?.v || 'N/A';
-                    const appointmentType = row.c[3]?.v || 'N/A';
-                    const timestamp = row.c[4]?.v || null;
+                    const originalIndex = allRows.findIndex(r => r === row);
+                    const rowNumber = originalIndex + 2; // +1 for 0-index, +1 for header row
+
+                    const [date, phone, petName, appointmentType, timestamp] = [
+                        row.c[0]?.v || 'N/A',
+                        (row.c[1]?.v || 'N/A').replace(/'/g, ''), // Remove leading quote for display
+                        row.c[2]?.v || 'N/A',
+                        row.c[3]?.v || 'N/A',
+                        row.c[4]?.v || null
+                    ];
                     
                     html += `
-                        <div class="border border-gray-200 rounded-xl p-4 transition-all hover:shadow-md hover:border-blue-500">
+                        <div class="dashboard-item border border-gray-200 rounded-xl p-4 transition-all hover:shadow-md hover:border-blue-500"
+                             data-row-number="${rowNumber}"
+                             data-pet-name="${petName}"
+                             data-phone="${phone}"
+                             data-appointment-type="${appointmentType}"
+                             data-send-date="${date}">
                             <div class="flex justify-between items-start">
                                 <p class="font-bold text-lg text-gray-800">${petName}</p>
-                                <span class="text-xs text-gray-500">${formatRelativeTime(timestamp)}</span>
+                                <div class="flex items-center space-x-2">
+                                    <button class="edit-btn action-btn text-gray-500 hover:text-blue-600"><i class="fa-solid fa-pencil"></i></button>
+                                    <button class="delete-btn action-btn text-gray-500 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
+                                </div>
                             </div>
                             <p class="text-sm text-gray-600 mt-2"><i class="fa-solid fa-syringe w-4 mr-1 text-gray-400"></i> ${appointmentType.split(' คำแนะนำ')[0]}</p>
                             <div class="flex text-sm text-gray-600 mt-1">
                                 <p class="mr-4"><i class="fa-solid fa-mobile-screen-button w-4 mr-1 text-gray-400"></i> ${phone}</p>
                                 <p><i class="fa-solid fa-calendar-days w-4 mr-1 text-gray-400"></i> ${date}</p>
                             </div>
+                             <p class="text-xs text-right text-gray-400 mt-2">${formatRelativeTime(timestamp)}</p>
                         </div>
                     `;
                 });
@@ -222,23 +221,94 @@
             }
         }
 
-        document.getElementById('smsForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        // --- FORM EDIT/DELETE LOGIC ---
+        function enterEditMode(item) {
+            exitEditMode(); // Reset first in case of weird state
+            editRowNumberInput.value = item.dataset.rowNumber;
             
-            const formData = new FormData(this);
+            form.elements.petName.value = item.dataset.petName;
+            form.elements.phoneNumber.value = item.dataset.phone;
+            form.elements.appointmentType.value = item.dataset.appointmentType;
+            form.elements.sendDate.value = convertBuddhistToGregorian(item.dataset.sendDate);
+
+            formTitle.innerHTML = '<i class="fa-solid fa-pencil mr-3 text-amber-500"></i> แก้ไขข้อมูล';
+            submitBtnText.textContent = 'อัปเดตข้อมูล';
+            submitBtnIcon.className = 'fa-solid fa-floppy-disk mr-2';
+            submitBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            submitBtn.classList.add('bg-amber-500', 'hover:bg-amber-600');
+            
+            clearBtnText.textContent = 'ยกเลิกแก้ไข';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function exitEditMode() {
+            editRowNumberInput.value = '';
+            form.reset();
+            document.getElementById('sendDate').valueAsDate = new Date();
+
+            formTitle.innerHTML = '<i class="fa-solid fa-file-pen mr-3 text-blue-600"></i> สร้างข้อความแจ้งเตือน';
+            submitBtnText.textContent = 'บันทึก';
+            submitBtnIcon.className = 'fa-solid fa-paper-plane mr-2';
+            submitBtn.classList.remove('bg-amber-500', 'hover:bg-amber-600');
+            submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+
+            clearBtnText.textContent = 'ล้างข้อมูล';
+        }
+
+        function handleDelete(rowNumber) {
+            Swal.fire({
+                title: 'คุณแน่ใจหรือไม่?',
+                text: "คุณต้องการลบข้อมูลนี้ใช่ไหม",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'ใช่, ลบเลย!',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    sendDataToScript({ action: 'delete', rowNumber: rowNumber }, 'กำลังลบข้อมูล...');
+                }
+            });
+        }
+
+        // --- EVENT LISTENERS ---
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const isEditing = !!editRowNumberInput.value;
+            const action = isEditing ? 'update' : 'create';
+            const loadingText = isEditing ? 'กำลังอัปเดต...' : 'กำลังบันทึก...';
+            
             const data = {
-                sendDate: convertToBuddhistEra(formData.get('sendDate')),
-                phoneNumber: formData.get('phoneNumber'),
-                petName: formData.get('petName'),
-                appointmentType: formData.get('appointmentType')
+                action: action,
+                sendDate: convertToBuddhistEra(form.elements.sendDate.value),
+                phoneNumber: form.elements.phoneNumber.value,
+                petName: form.elements.petName.value,
+                appointmentType: form.elements.appointmentType.value
             };
 
-            Swal.fire({
-                title: 'กำลังบันทึกข้อมูล',
-                text: 'กรุณารอสักครู่...',
-                allowOutsideClick: false,
-                didOpen: () => { Swal.showLoading(); }
-            });
+            if (isEditing) {
+                data.rowNumber = editRowNumberInput.value;
+            }
+
+            sendDataToScript(data, loadingText);
+        });
+
+        clearBtn.addEventListener('click', exitEditMode);
+
+        document.getElementById('dashboard').addEventListener('click', function(e) {
+            const editBtn = e.target.closest('.edit-btn');
+            if (editBtn) enterEditMode(editBtn.closest('.dashboard-item'));
+            
+            const deleteBtn = e.target.closest('.delete-btn');
+            if (deleteBtn) handleDelete(deleteBtn.closest('.dashboard-item').dataset.rowNumber);
+        });
+        
+        document.getElementById('phoneNumber').addEventListener('input', (e) => e.target.value = e.target.value.replace(/[^0-9]/g, ''));
+
+        // --- UNIVERSAL SCRIPT SENDER ---
+        function sendDataToScript(data, loadingText) {
+            Swal.fire({ title: loadingText, text: 'กรุณารอสักครู่...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             const callbackName = 'jsonp_callback_' + Date.now();
             window[callbackName] = function(response) {
@@ -246,19 +316,11 @@
                 delete window[callbackName];
                 
                 if (response.result === 'success') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'บันทึกสำเร็จ!',
-                        text: 'ข้อมูลได้ถูกบันทึกเรียบร้อยแล้ว',
-                        timer: 2000,
-                        showConfirmButton: false
-                    }).then(() => {
-                        document.getElementById('smsForm').reset();
-                        document.getElementById('sendDate').valueAsDate = new Date();
-                        loadDashboard();
-                    });
+                    Swal.fire({ icon: 'success', title: 'สำเร็จ!', timer: 1500, showConfirmButton: false });
+                    exitEditMode();
+                    loadDashboard();
                 } else {
-                    handleError(new Error(response.error || 'Unknown error from Apps Script'));
+                    handleError(new Error(response.error || 'Unknown error'));
                 }
             };
 
@@ -269,26 +331,17 @@
             document.head.appendChild(script);
             
             setTimeout(() => {
-                if (window[callbackName]) {
-                    handleError(new Error('Request timed out.'));
-                }
+                if (window[callbackName]) { handleError(new Error('Request timed out.')); }
             }, 10000);
-        });
+        }
 
         function handleError(error) {
             console.error('Error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'เกิดข้อผิดพลาด!',
-                text: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง',
-            });
+            Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด!', text: 'ไม่สามารถดำเนินการได้ กรุณาลองใหม่อีกครั้ง' });
         }
 
-        document.getElementById('phoneNumber').addEventListener('input', function(e) {
-            e.target.value = e.target.value.replace(/[^0-9]/g, '');
-        });
-
-        document.getElementById('sendDate').valueAsDate = new Date();
+        // --- INITIAL LOAD ---
+        exitEditMode(); // Set initial state
         loadDashboard();
     </script>
 </body>
