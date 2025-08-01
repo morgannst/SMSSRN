@@ -193,7 +193,7 @@
                 return;
             }
             
-            const recentRows = allRows.slice().reverse().slice(0, 10); // Show last 10
+            const recentRows = allRows.slice().reverse().slice(0, 3); // Show last 3
             
             dashboard.innerHTML = '<div class="space-y-3">' + recentRows.map((row) => {
                 const originalIndex = allRows.findIndex(r => r === row);
