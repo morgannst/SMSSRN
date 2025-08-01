@@ -237,11 +237,19 @@
                 if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
                 const text = await response.text();
                 
-                if (!text.startsWith('google.visualization.Query.setResponse')) {
-                    console.error("Unexpected GVIZ response:", text);
-                    throw new Error("Invalid GVIZ response format. Please check sheet sharing permissions.");
+                // FIX: The response from Google Sheets is a JSONP callback.
+                // It looks like: /*O_o*/\ngoogle.visualization.Query.setResponse({...});
+                // We need to robustly find and extract the JSON part.
+                const startIndex = text.indexOf('(');
+                const endIndex = text.lastIndexOf(')');
+
+                if (startIndex === -1 || endIndex === -1) {
+                    console.error("Invalid JSONP response format:", text);
+                    throw new Error("Could not parse the data from Google Sheets. Please check sheet sharing permissions.");
                 }
-                const jsonData = JSON.parse(text.substring(47, text.length - 2));
+
+                const jsonString = text.substring(startIndex + 1, endIndex);
+                const jsonData = JSON.parse(jsonString);
 
                 if (!jsonData.table || !jsonData.table.rows) {
                     throw new Error("GVIZ response is valid JSON but lacks table data.");
