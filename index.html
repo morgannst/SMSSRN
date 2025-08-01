@@ -156,7 +156,7 @@
         
         function getStatus(appointmentDate) {
             if (!appointmentDate) return 'past';
-            const today = new Date('2025-08-01T00:00:00'); // Using specified current date
+            const today = new Date(); // Using actual current date
             today.setHours(0, 0, 0, 0);
             appointmentDate.setHours(0, 0, 0, 0);
 
@@ -206,7 +206,7 @@
                 const rowNumber = originalIndex + 2;
 
                 const [date, phone, petName, appointmentType] = [
-                    row.c[0]?.v || 'N/A',
+                    row.c[0]?.f || 'N/A', // Use formatted date 'f'
                     (row.c[1]?.v || 'N/A').replace(/'/g, ''),
                     row.c[2]?.v || 'N/A',
                     row.c[3]?.v || 'N/A',
