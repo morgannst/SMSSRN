@@ -101,7 +101,15 @@
                     </div>
                     <div>
                         <label for="sendDate" class="block text-sm font-semibold text-gray-700 mb-2">วันที่ส่ง SMS</label>
-                         <div class="input-with-icon"><i class="fa-solid fa-calendar-days input-icon"></i><input type="date" id="sendDate" name="sendDate" required class="form-input"></div>
+                         <div class="input-with-icon">
+                            <i class="fa-solid fa-calendar-days input-icon"></i>
+                            <input type="date" id="sendDate" name="sendDate" required class="form-input">
+                         </div>
+                         <!-- ส่วนแสดงวันที่ พ.ศ. ที่เพิ่มเข้ามา -->
+                         <div id="date-preview" class="mt-2 text-sm text-blue-600 font-medium pl-1 flex items-center">
+                             <i class="fa-regular fa-calendar-check mr-2"></i>
+                             <span>วันที่เลือก (พ.ศ.): <span id="be-date-text">...</span></span>
+                         </div>
                     </div>
 
                     <!-- Action Buttons -->
@@ -169,6 +177,8 @@
         const submitBtn = document.getElementById('submitBtn');
         const requiredInputs = form.querySelectorAll('[required]');
         const searchInput = document.getElementById('searchInput');
+        const sendDateInput = document.getElementById('sendDate');
+        const beDateText = document.getElementById('be-date-text');
         
         // --- APP STATE ---
         const appState = {
@@ -251,6 +261,17 @@
             const apptName = appointmentType.split(' คำแนะนำ')[0];
             return `แจ้งเตือนนัดหมายน้อง ${petName} วันพรุ่งนี้\nนัด : ${apptName}\nหากต้องการเลื่อนนัด/สอบถาม โทร 0634461952 หรือ LINE: @SRNANIMALCARE\nโรงพยาบาลสัตว์สุราษฎร์ธานี (ใน บขส.ใหม่)`;
         }
+        
+        // Function to update the Buddhist Era preview text
+        function updateDatePreview() {
+            const val = sendDateInput.value;
+            if (val) {
+                const beDate = convertToBuddhistEra(val);
+                beDateText.textContent = beDate;
+            } else {
+                beDateText.textContent = '...';
+            }
+        }
 
         // --- UI UPDATE FUNCTIONS ---
         function updateFormUI() {
@@ -278,6 +299,7 @@
                 clearBtnText.textContent = 'ล้างข้อมูล';
             }
             validateForm();
+            updateDatePreview(); // Update preview on UI change/reset
         }
 
         function renderDashboard(rows) {
@@ -434,6 +456,9 @@
             });
             renderDashboard(filteredRows);
         });
+        
+        // Date Input Listener
+        sendDateInput.addEventListener('change', updateDatePreview);
 
         function enterEditMode(item) {
             appState.isEditing = true;
