@@ -515,6 +515,47 @@
             const action = appState.isEditing ? 'update' : 'create';
             const loadingText = appState.isEditing ? 'กำลังอัปเดต...' : 'กำลังบันทึก...';
             
+            // DUPLICATE CHECK LOGIC (Start)
+            if (!appState.isEditing) {
+                const petNameInput = form.elements.petName.value.trim();
+                const sendDateInput = form.elements.sendDate.value;
+                const formattedSendDate = convertToBuddhistEra(sendDateInput);
+
+                // Check if duplicate exists
+                const duplicate = appState.allRows.find(row => 
+                    row.petName.trim() === petNameInput && 
+                    row.formattedDate === formattedSendDate
+                );
+
+                if (duplicate) {
+                    Swal.fire({
+                        title: 'พบข้อมูลซ้ำ!',
+                        text: `มีข้อมูลของน้อง "${petNameInput}" ในวันที่ ${formattedSendDate} แล้ว ต้องการบันทึกซ้ำหรือไม่?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'ยืนยันบันทึกซ้ำ',
+                        cancelButtonText: 'ยกเลิก'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // User confirmed duplicate save
+                             const data = {
+                                action: action,
+                                sendDate: formattedSendDate,
+                                phoneNumber: form.elements.phoneNumber.value,
+                                petName: form.elements.petName.value,
+                                appointmentType: form.elements.appointmentType.value,
+                                rowNumber: appState.editingRowNumber
+                            };
+                            callAppsScript(data, loadingText);
+                        }
+                    });
+                    return; // Stop execution, waiting for user decision
+                }
+            }
+            // DUPLICATE CHECK LOGIC (End)
+            
             const data = {
                 action: action,
                 sendDate: convertToBuddhistEra(form.elements.sendDate.value),
