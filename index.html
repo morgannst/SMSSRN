@@ -21,16 +21,25 @@
         .swal2-popup { font-family: 'Sarabun', sans-serif; }
         .action-btn { background-color: transparent; border: none; cursor: pointer; padding: 0.5rem; border-radius: 50%; transition: background-color 0.2s; }
         .action-btn:hover { background-color: #e5e7eb; }
-        /* Styles for validation */
         .form-input.invalid { border-color: #ef4444; }
         .validation-message { color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem; display: none; }
-        /* Styles for disabled button */
         #submitBtn:disabled { background-color: #9ca3af; cursor: not-allowed; transform: scale(1); box-shadow: none; }
+        
+        /* Skeleton Loading Animation */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .skeleton {
+            background-color: #e5e7eb;
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            border-radius: 0.5rem;
+        }
     </style>
 </head>
 <body class="min-h-screen">
     <!-- Header -->
-    <header class="bg-white shadow-md">
+    <header class="bg-white shadow-md sticky top-0 z-50">
         <div class="container mx-auto px-4 sm:px-6 py-4">
             <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 text-center">
                 <i class="fa-solid fa-paw text-blue-600"></i> ระบบแจ้งเตือน SMS โรงพยาบาลสัตว์
@@ -42,7 +51,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
             <!-- SMS Data Entry Form -->
-            <div class="card p-6 lg:p-8">
+            <div class="card p-6 lg:p-8 h-fit">
                 <h2 id="form-title" class="text-2xl font-bold text-gray-800 mb-6 flex items-center transition-all">
                     <i class="fa-solid fa-file-pen mr-3 text-blue-600"></i>
                     <span>สร้างข้อความแจ้งเตือน</span>
@@ -106,13 +115,42 @@
             </div>
 
             <!-- Dashboard Section -->
-            <div class="card p-6 lg:p-8">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                     <i class="fa-solid fa-clock-rotate-left mr-3 text-blue-600"></i>
-                    รายการล่าสุด
-                </h2>
-                <div id="dashboard" class="space-y-4">
-                    <div class="text-center py-8"><i class="fa-solid fa-spinner fa-spin text-4xl text-blue-500"></i><p class="text-gray-500 mt-4">กำลังโหลดข้อมูล...</p></div>
+            <div class="card p-6 lg:p-8 h-fit">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                        <i class="fa-solid fa-clock-rotate-left mr-3 text-blue-600"></i>
+                        รายการข้อมูล
+                    </h2>
+                    <!-- Refresh Button -->
+                    <button onclick="loadDashboard()" class="text-gray-400 hover:text-blue-600 transition p-2 rounded-full hover:bg-gray-100" title="รีเฟรชข้อมูล">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="mb-6 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+                    </div>
+                    <input type="text" id="searchInput" 
+                           class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 sm:text-sm transition duration-150 ease-in-out" 
+                           placeholder="ค้นหาด้วยชื่อสัตว์เลี้ยง หรือ เบอร์โทรศัพท์...">
+                </div>
+                
+                <div id="dashboard" class="space-y-4 min-h-[200px]">
+                    <!-- Initial Loading State (Skeleton) -->
+                    <div class="space-y-3">
+                         <div class="border border-gray-200 rounded-xl p-4">
+                            <div class="flex justify-between mb-2"><div class="skeleton h-6 w-1/3"></div><div class="skeleton h-6 w-8"></div></div>
+                            <div class="skeleton h-4 w-2/3 mb-2"></div>
+                            <div class="flex gap-4"><div class="skeleton h-4 w-1/4"></div><div class="skeleton h-4 w-1/4"></div></div>
+                         </div>
+                         <div class="border border-gray-200 rounded-xl p-4">
+                            <div class="flex justify-between mb-2"><div class="skeleton h-6 w-1/3"></div><div class="skeleton h-6 w-8"></div></div>
+                            <div class="skeleton h-4 w-2/3 mb-2"></div>
+                            <div class="flex gap-4"><div class="skeleton h-4 w-1/4"></div><div class="skeleton h-4 w-1/4"></div></div>
+                         </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -128,11 +166,13 @@
         const dashboard = document.getElementById('dashboard');
         const submitBtn = document.getElementById('submitBtn');
         const requiredInputs = form.querySelectorAll('[required]');
+        const searchInput = document.getElementById('searchInput');
         
         // --- APP STATE ---
         const appState = {
             isEditing: false,
             editingRowNumber: null,
+            allRows: [], // Store all fetched rows here for searching
         };
 
         // --- HELPER FUNCTIONS ---
@@ -150,13 +190,12 @@
             const parts = buddhistDate.split('/');
             const gregorianYear = parseInt(parts[2], 10) - 543;
             if (isNaN(gregorianYear)) return null;
-            // Month is 0-indexed in JavaScript Date
             return new Date(gregorianYear, parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
         }
         
         function getStatus(appointmentDate) {
             if (!appointmentDate) return 'past';
-            const today = new Date(); // Using actual current date
+            const today = new Date();
             today.setHours(0, 0, 0, 0);
             appointmentDate.setHours(0, 0, 0, 0);
 
@@ -190,37 +229,39 @@
                 submitBtn.classList.replace('hover:bg-amber-600', 'hover:bg-blue-700');
                 clearBtnText.textContent = 'ล้างข้อมูล';
             }
-            validateForm(); // Re-validate form after UI change
+            validateForm();
         }
 
-        function renderDashboard(allRows) {
-            if (allRows.length === 0) {
-                dashboard.innerHTML = '<div class="text-center py-8"><i class="fa-solid fa-folder-open text-4xl text-gray-300"></i><p class="text-gray-500 mt-4">ยังไม่มีข้อมูลในระบบ</p></div>';
+        function renderDashboard(rows) {
+            if (!rows || rows.length === 0) {
+                dashboard.innerHTML = `
+                    <div class="text-center py-8 flex flex-col items-center justify-center opacity-70">
+                        <i class="fa-solid fa-folder-open text-5xl text-gray-300 mb-3"></i>
+                        <p class="text-gray-500">ไม่พบข้อมูล</p>
+                    </div>`;
                 return;
             }
             
-            const recentRows = allRows.slice().reverse().slice(0, 3);
-            
-            dashboard.innerHTML = '<div class="space-y-3">' + recentRows.map((row) => {
-                const originalIndex = allRows.findIndex(r => r === row);
-                const rowNumber = originalIndex + 2;
+            // If searching (input not empty), show all matches. If not searching, show last 3.
+            const isSearching = searchInput.value.trim().length > 0;
+            const rowsToDisplay = isSearching ? rows : rows.slice(0, 3);
 
-                const [date, phone, petName, appointmentType] = [
-                    row.c[0]?.f || 'N/A', // Use formatted date 'f'
-                    (row.c[1]?.v || 'N/A').replace(/'/g, ''),
-                    row.c[2]?.v || 'N/A',
-                    row.c[3]?.v || 'N/A',
-                ];
-
-                const appointmentDate = convertBuddhistToGregorian(date);
+            dashboard.innerHTML = '<div class="space-y-3">' + rowsToDisplay.map((row) => {
+                // Note: We pass the original index from appState.allRows if possible, 
+                // but here 'rows' might be filtered. We need to find the correct original index for deletion/editing.
+                // However, Google Sheets row numbers are static. We need a way to track them.
+                // Better approach: storing row number in the object when fetching.
+                
+                const { rowNumber, date, phone, petName, appointmentType, formattedDate } = row;
+                const appointmentDate = convertBuddhistToGregorian(formattedDate);
                 const status = getStatus(appointmentDate);
                 const statusColors = { future: 'bg-green-500', today: 'bg-yellow-500', past: 'bg-gray-400' };
 
                 return `
-                    <div class="dashboard-item relative border border-gray-200 rounded-xl p-4 transition-all hover:shadow-lg hover:border-blue-500 hover:-translate-y-1"
+                    <div class="dashboard-item relative border border-gray-200 rounded-xl p-4 transition-all hover:shadow-lg hover:border-blue-500 hover:-translate-y-1 bg-white"
                          data-row-number="${rowNumber}" data-pet-name="${petName}" data-phone="${phone}"
-                         data-appointment-type="${appointmentType}" data-send-date="${date}">
-                        <span class="absolute top-3 right-3 h-3 w-3 rounded-full ${statusColors[status]}" title="สถานะ: ${status}"></span>
+                         data-appointment-type="${appointmentType}" data-send-date="${formattedDate}">
+                        <span class="absolute top-3 right-3 h-3 w-3 rounded-full ${statusColors[status]} ring-2 ring-white" title="สถานะ: ${status}"></span>
                         <div class="flex justify-between items-start">
                             <p class="font-bold text-lg text-gray-800 pr-10">${petName}</p>
                             <div class="flex items-center space-x-2">
@@ -231,11 +272,27 @@
                         <p class="text-sm text-gray-600 mt-2"><i class="fa-solid fa-syringe w-4 mr-1 text-gray-400"></i> ${appointmentType.split(' คำแนะนำ')[0]}</p>
                         <div class="flex text-sm text-gray-600 mt-1">
                             <p class="mr-4"><i class="fa-solid fa-mobile-screen-button w-4 mr-1 text-gray-400"></i> ${phone}</p>
-                            <p><i class="fa-solid fa-calendar-days w-4 mr-1 text-gray-400"></i> ${date}</p>
+                            <p><i class="fa-solid fa-calendar-days w-4 mr-1 text-gray-400"></i> ${formattedDate}</p>
                         </div>
                     </div>
                 `;
             }).join('') + '</div>';
+        }
+        
+        function showSkeletonLoading() {
+             dashboard.innerHTML = `
+                <div class="space-y-3">
+                     <div class="border border-gray-200 rounded-xl p-4 animate-pulse">
+                        <div class="flex justify-between mb-2"><div class="bg-gray-200 h-6 w-1/3 rounded"></div><div class="bg-gray-200 h-6 w-8 rounded"></div></div>
+                        <div class="bg-gray-200 h-4 w-2/3 mb-2 rounded"></div>
+                        <div class="flex gap-4"><div class="bg-gray-200 h-4 w-1/4 rounded"></div><div class="bg-gray-200 h-4 w-1/4 rounded"></div></div>
+                     </div>
+                     <div class="border border-gray-200 rounded-xl p-4 animate-pulse">
+                        <div class="flex justify-between mb-2"><div class="bg-gray-200 h-6 w-1/3 rounded"></div><div class="bg-gray-200 h-6 w-8 rounded"></div></div>
+                        <div class="bg-gray-200 h-4 w-2/3 mb-2 rounded"></div>
+                        <div class="flex gap-4"><div class="bg-gray-200 h-4 w-1/4 rounded"></div><div class="bg-gray-200 h-4 w-1/4 rounded"></div></div>
+                     </div>
+                </div>`;
         }
 
         // --- FORM VALIDATION ---
@@ -263,12 +320,12 @@
                  phoneValidationMessage.style.display = 'none';
             }
 
-
             submitBtn.disabled = !isFormValid;
         }
 
         // --- DATA FETCHING & ACTIONS ---
         async function loadDashboard() {
+            showSkeletonLoading();
             try {
                 const response = await fetch(`${GVIZ_URL}&t=${new Date().getTime()}`);
                 if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
@@ -278,31 +335,55 @@
                 const endIndex = text.lastIndexOf(')');
 
                 if (startIndex === -1 || endIndex === -1) {
-                    console.error("Invalid JSONP response format:", text);
-                    throw new Error("Could not parse the data from Google Sheets. Please check sheet sharing permissions.");
+                    throw new Error("Could not parse the data from Google Sheets.");
                 }
 
                 const jsonString = text.substring(startIndex + 1, endIndex);
                 const jsonData = JSON.parse(jsonString);
 
                 if (!jsonData.table || !jsonData.table.rows) {
-                    throw new Error("GVIZ response is valid JSON but lacks table data.");
+                    // Handle empty sheet case
+                    appState.allRows = [];
+                    renderDashboard([]);
+                    return;
                 }
                 
-                renderDashboard(jsonData.table.rows);
+                // Process rows and store in state
+                appState.allRows = jsonData.table.rows.map((row, index) => {
+                    return {
+                        // Since rows array index corresponds to sheet row, but GVIZ might skip empty rows?
+                        // Actually GVIZ returns rows as they are.
+                        // Row number in sheet = index + 2 (header is row 1, array is 0-indexed)
+                        rowNumber: index + 2,
+                        formattedDate: row.c[0]?.f || 'N/A',
+                        phone: (row.c[1]?.v || 'N/A').replace(/'/g, ''),
+                        petName: row.c[2]?.v || 'N/A',
+                        appointmentType: row.c[3]?.v || 'N/A'
+                    };
+                }).reverse(); // Newest first
+
+                renderDashboard(appState.allRows);
             } catch (error) {
                 console.error('Error loading dashboard:', error);
-                const errorHTML = `
+                dashboard.innerHTML = `
                     <div class="text-center py-8 bg-red-50 p-4 rounded-lg border border-red-200">
                         <i class="fa-solid fa-circle-exclamation text-4xl text-red-500"></i>
                         <p class="text-red-700 mt-4 font-bold">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
-                        <p class="text-red-600 mt-2 text-sm">${error.message}</p>
-                        <p class="text-gray-600 mt-4 text-sm"><b>ข้อแนะนำ:</b> ปัญหานี้มักเกิดจาก Google Sheet ไม่ได้ตั้งค่าการแชร์เป็น "ทุกคนที่มีลิงก์" กรุณาตรวจสอบการตั้งค่าการแชร์ของชีทอีกครั้ง</p>
+                        <p class="text-red-600 mt-2 text-sm">กรุณาตรวจสอบการเชื่อมต่อหรือการตั้งค่าแชร์</p>
                     </div>
                 `;
-                dashboard.innerHTML = errorHTML;
             }
         }
+        
+        // Search Functionality
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredRows = appState.allRows.filter(row => {
+                return row.petName.toLowerCase().includes(searchTerm) || 
+                       row.phone.includes(searchTerm);
+            });
+            renderDashboard(filteredRows);
+        });
 
         function enterEditMode(item) {
             appState.isEditing = true;
@@ -315,7 +396,6 @@
             if (gregorianDate) {
                 form.elements.sendDate.value = gregorianDate.toISOString().split('T')[0];
             }
-
 
             updateFormUI();
             window.scrollTo({ top: 0, behavior: 'smooth' });
