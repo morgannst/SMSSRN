@@ -105,15 +105,8 @@
                 <form id="smsForm" class="space-y-6">
                     <input type="hidden" id="editRowNumber" name="editRowNumber">
                     <!-- Form fields -->
-                    <div>
-                        <label for="petName" class="block text-sm font-semibold text-gray-700 mb-2">ชื่อสัตว์เลี้ยง</label>
-                        <div class="input-with-icon relative">
-                            <i class="fa-solid fa-dog input-icon"></i>
-                            <input type="text" id="petName" name="petName" required placeholder="เช่น น้องนำโชค" class="form-input" autocomplete="off">
-                            <!-- Container for Pet Suggestions -->
-                            <div id="pet-suggestions" class="suggestions-list"></div>
-                        </div>
-                    </div>
+                    
+                    <!-- Phone Number First -->
                     <div>
                         <label for="phoneNumber" class="block text-sm font-semibold text-gray-700 mb-2">เบอร์ติดต่อ (10 หลัก)</label>
                         <div class="input-with-icon relative">
@@ -124,6 +117,18 @@
                         </div>
                         <p id="phone-validation-message" class="validation-message">กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง</p>
                     </div>
+
+                    <!-- Pet Name Second -->
+                    <div>
+                        <label for="petName" class="block text-sm font-semibold text-gray-700 mb-2">ชื่อสัตว์เลี้ยง</label>
+                        <div class="input-with-icon relative">
+                            <i class="fa-solid fa-dog input-icon"></i>
+                            <input type="text" id="petName" name="petName" required placeholder="เช่น น้องนำโชค" class="form-input" autocomplete="off">
+                            <!-- Container for Pet Suggestions -->
+                            <div id="pet-suggestions" class="suggestions-list"></div>
+                        </div>
+                    </div>
+
                     <div>
                         <label for="appointmentType" class="block text-sm font-semibold text-gray-700 mb-2">ประเภทนัดหมาย</label>
                         <div class="input-with-icon"><i class="fa-solid fa-syringe input-icon"></i>
@@ -752,3 +757,4 @@
     </script>
 </body>
 </html>
+```eof
