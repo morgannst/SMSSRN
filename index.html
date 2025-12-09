@@ -4,34 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบเตรียมข้อมูลส่ง SMS - โรงพยาบาลสัตว์สุราษฏร์ธานี</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Flatpickr (CSS & Theme) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_blue.css">
-
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <style>
         body { font-family: 'Sarabun', sans-serif; background-color: #f0f4f8; }
         .card { background-color: #ffffff; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.1); border: 1px solid #e5e7eb; }
         .form-input {
             width: 100%; border-radius: 0.75rem; border: 1px solid #d1d5db;
             padding: 0.75rem 1rem 0.75rem 2.75rem; transition: all 0.3s;
-            background-color: white; /* Ensure bg is white for flatpickr */
         }
         .form-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); outline: none; }
         .input-with-icon { position: relative; }
-        .input-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #9ca3af; z-index: 10; }
+        .input-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #9ca3af; }
         .swal2-popup { font-family: 'Sarabun', sans-serif; }
         .action-btn { background-color: transparent; border: none; cursor: pointer; padding: 0.5rem; border-radius: 50%; transition: background-color 0.2s; }
         .action-btn:hover { background-color: #e5e7eb; }
-        .copy-btn { color: #059669; background-color: #ecfdf5; }
+        .copy-btn { color: #059669; background-color: #ecfdf5; } /* สีเขียวสำหรับปุ่ม Copy */
         .copy-btn:hover { background-color: #d1fae5; }
         .form-input.invalid { border-color: #ef4444; }
         .validation-message { color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem; display: none; }
@@ -47,41 +37,6 @@
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
             border-radius: 0.5rem;
         }
-        
-        /* Flatpickr Customization */
-        .flatpickr-calendar { font-family: 'Sarabun', sans-serif; }
-
-        /* Autocomplete Suggestions Styles */
-        .suggestions-list {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.75rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            z-index: 50;
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 4px;
-            display: none; /* Hidden by default */
-        }
-        .suggestion-item {
-            padding: 0.75rem 1rem;
-            cursor: pointer;
-            border-bottom: 1px solid #f3f4f6;
-            transition: background-color 0.2s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .suggestion-item:last-child { border-bottom: none; }
-        .suggestion-item:hover { background-color: #f0f9ff; }
-        .suggestion-main { font-weight: 600; color: #1f2937; }
-        .suggestion-sub { font-size: 0.875rem; color: #6b7280; display: flex; align-items: center; }
-        
-        .last-updated { font-size: 0.75rem; color: #6b7280; margin-right: 8px; }
     </style>
 </head>
 <body class="min-h-screen">
@@ -107,30 +62,15 @@
                 <form id="smsForm" class="space-y-6">
                     <input type="hidden" id="editRowNumber" name="editRowNumber">
                     <!-- Form fields -->
-                    
-                    <!-- Phone Number First -->
-                    <div>
-                        <label for="phoneNumber" class="block text-sm font-semibold text-gray-700 mb-2">เบอร์ติดต่อ (10 หลัก)</label>
-                        <div class="input-with-icon relative">
-                            <i class="fa-solid fa-mobile-screen-button input-icon"></i>
-                            <input type="tel" id="phoneNumber" name="phoneNumber" required maxlength="10" pattern="0[0-9]{9}" placeholder="0812345678" class="form-input" autocomplete="off">
-                            <!-- Container for Phone Suggestions -->
-                            <div id="phone-suggestions" class="suggestions-list"></div>
-                        </div>
-                        <p id="phone-validation-message" class="validation-message">กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง</p>
-                    </div>
-
-                    <!-- Pet Name Second -->
                     <div>
                         <label for="petName" class="block text-sm font-semibold text-gray-700 mb-2">ชื่อสัตว์เลี้ยง</label>
-                        <div class="input-with-icon relative">
-                            <i class="fa-solid fa-dog input-icon"></i>
-                            <input type="text" id="petName" name="petName" required placeholder="เช่น น้องนำโชค" class="form-input" autocomplete="off">
-                            <!-- Container for Pet Suggestions -->
-                            <div id="pet-suggestions" class="suggestions-list"></div>
-                        </div>
+                        <div class="input-with-icon"><i class="fa-solid fa-dog input-icon"></i><input type="text" id="petName" name="petName" required placeholder="เช่น น้องนำโชค" class="form-input"></div>
                     </div>
-
+                    <div>
+                        <label for="phoneNumber" class="block text-sm font-semibold text-gray-700 mb-2">เบอร์ติดต่อ (10 หลัก)</label>
+                        <div class="input-with-icon"><i class="fa-solid fa-mobile-screen-button input-icon"></i><input type="tel" id="phoneNumber" name="phoneNumber" required maxlength="10" pattern="[0-9]{10}" placeholder="0812345678" class="form-input"></div>
+                        <p id="phone-validation-message" class="validation-message">กรุณากรอกเบอร์โทรศัพท์ให้ครบ 10 หลัก</p>
+                    </div>
                     <div>
                         <label for="appointmentType" class="block text-sm font-semibold text-gray-700 mb-2">ประเภทนัดหมาย</label>
                         <div class="input-with-icon"><i class="fa-solid fa-syringe input-icon"></i>
@@ -163,7 +103,12 @@
                         <label for="sendDate" class="block text-sm font-semibold text-gray-700 mb-2">วันที่ส่ง SMS</label>
                          <div class="input-with-icon">
                             <i class="fa-solid fa-calendar-days input-icon"></i>
-                            <input type="text" id="sendDate" name="sendDate" required class="form-input" placeholder="เลือกวันที่...">
+                            <input type="date" id="sendDate" name="sendDate" required class="form-input">
+                         </div>
+                         <!-- ส่วนแสดงวันที่ พ.ศ. ที่เพิ่มเข้ามา -->
+                         <div id="date-preview" class="mt-2 text-sm text-blue-600 font-medium pl-1 flex items-center">
+                             <i class="fa-regular fa-calendar-check mr-2"></i>
+                             <span>วันที่เลือก (พ.ศ.): <span id="be-date-text">...</span></span>
                          </div>
                     </div>
 
@@ -186,14 +131,10 @@
                         <i class="fa-solid fa-clock-rotate-left mr-3 text-blue-600"></i>
                         รายการข้อมูล
                     </h2>
-                    
-                    <div class="flex items-center">
-                        <span id="last-updated" class="last-updated hidden sm:inline"></span>
-                        <!-- Refresh Button -->
-                        <button onclick="loadDashboard()" class="text-gray-400 hover:text-blue-600 transition p-2 rounded-full hover:bg-gray-100" title="รีเฟรชข้อมูล (กดเมื่อข้อมูลไม่ตรง)">
-                            <i class="fa-solid fa-rotate-right"></i>
-                        </button>
-                    </div>
+                    <!-- Refresh Button -->
+                    <button onclick="loadDashboard()" class="text-gray-400 hover:text-blue-600 transition p-2 rounded-full hover:bg-gray-100" title="รีเฟรชข้อมูล">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
                 </div>
 
                 <!-- Search Bar -->
@@ -214,15 +155,16 @@
                             <div class="skeleton h-4 w-2/3 mb-2"></div>
                             <div class="flex gap-4"><div class="skeleton h-4 w-1/4"></div><div class="skeleton h-4 w-1/4"></div></div>
                          </div>
+                         <div class="border border-gray-200 rounded-xl p-4">
+                            <div class="flex justify-between mb-2"><div class="skeleton h-6 w-1/3"></div><div class="skeleton h-6 w-8"></div></div>
+                            <div class="skeleton h-4 w-2/3 mb-2"></div>
+                            <div class="flex gap-4"><div class="skeleton h-4 w-1/4"></div><div class="skeleton h-4 w-1/4"></div></div>
+                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
-    
-    <!-- Flatpickr JS & Thai Locale -->
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://npmcdn.com/flatpickr/dist/l10n/th.js"></script>
 
     <script>
         // --- CONFIGURATION ---
@@ -235,27 +177,14 @@
         const submitBtn = document.getElementById('submitBtn');
         const requiredInputs = form.querySelectorAll('[required]');
         const searchInput = document.getElementById('searchInput');
-        const phoneInput = document.getElementById('phoneNumber');
-        const petInput = document.getElementById('petName');
-        const phoneList = document.getElementById('phone-suggestions');
-        const petList = document.getElementById('pet-suggestions');
-        const lastUpdatedEl = document.getElementById('last-updated');
+        const sendDateInput = document.getElementById('sendDate');
+        const beDateText = document.getElementById('be-date-text');
         
-        // --- INITIALIZE FLATPICKR ---
-        const datePicker = flatpickr("#sendDate", {
-            locale: "th",
-            altInput: true,
-            altFormat: "d F Y",
-            dateFormat: "Y-m-d",
-            defaultDate: new Date(),
-            disableMobile: true
-        });
-
         // --- APP STATE ---
         const appState = {
             isEditing: false,
             editingRowNumber: null,
-            allRows: [], 
+            allRows: [], // Store all fetched rows here for searching
         };
 
         // --- HELPER FUNCTIONS ---
@@ -273,6 +202,7 @@
             const parts = buddhistDate.split('/');
             const gregorianYear = parseInt(parts[2], 10) - 543;
             if (isNaN(gregorianYear)) return null;
+            // Month is 0-indexed in JavaScript Date
             return new Date(gregorianYear, parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
         }
         
@@ -288,9 +218,10 @@
         }
 
         function copyToClipboard(text) {
+            // ใช้ document.execCommand('copy') เพื่อรองรับ iFrame และ Browser เก่า
             const textarea = document.createElement('textarea');
             textarea.value = text;
-            textarea.style.position = 'fixed'; 
+            textarea.style.position = 'fixed';  // ป้องกันการเลื่อนหน้าจอ
             textarea.style.left = '-9999px';
             document.body.appendChild(textarea);
             textarea.select();
@@ -308,16 +239,38 @@
                         toast.addEventListener('mouseleave', Swal.resumeTimer)
                     }
                 });
-                Toast.fire({ icon: 'success', title: 'คัดลอกข้อความแล้ว' });
+
+                Toast.fire({
+                    icon: 'success',
+                    title: 'คัดลอกข้อความแล้ว'
+                });
             } catch (err) {
-                Swal.fire({ icon: 'error', title: 'คัดลอกไม่สำเร็จ', text: 'เบราว์เซอร์ของคุณอาจไม่รองรับ' });
+                console.error('Unable to copy', err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'คัดลอกไม่สำเร็จ',
+                    text: 'เบราว์เซอร์ของคุณอาจไม่รองรับการคัดลอกอัตโนมัติ'
+                });
             }
+            
             document.body.removeChild(textarea);
         }
 
         function generateSMSMessage(petName, appointmentType) {
+            // ตัดคำแนะนำออกเพื่อให้ข้อความกระชับ
             const apptName = appointmentType.split(' คำแนะนำ')[0];
             return `แจ้งเตือนนัดหมายน้อง ${petName} วันพรุ่งนี้\nนัด : ${apptName}\nหากต้องการเลื่อนนัด/สอบถาม โทร 0634461952 หรือ LINE: @SRNANIMALCARE\nโรงพยาบาลสัตว์สุราษฎร์ธานี (ใน บขส.ใหม่)`;
+        }
+        
+        // Function to update the Buddhist Era preview text
+        function updateDatePreview() {
+            const val = sendDateInput.value;
+            if (val) {
+                const beDate = convertToBuddhistEra(val);
+                beDateText.textContent = beDate;
+            } else {
+                beDateText.textContent = '...';
+            }
         }
 
         // --- UI UPDATE FUNCTIONS ---
@@ -346,6 +299,7 @@
                 clearBtnText.textContent = 'ล้างข้อมูล';
             }
             validateForm();
+            updateDatePreview(); // Update preview on UI change/reset
         }
 
         function renderDashboard(rows) {
@@ -358,6 +312,7 @@
                 return;
             }
             
+            // If searching (input not empty), show all matches. If not searching, show last 3.
             const isSearching = searchInput.value.trim().length > 0;
             const rowsToDisplay = isSearching ? rows : rows.slice(0, 3);
 
@@ -367,7 +322,9 @@
                 const status = getStatus(appointmentDate);
                 const statusColors = { future: 'bg-green-500', today: 'bg-yellow-500', past: 'bg-gray-400' };
                 
+                // ใช้ข้อความจาก Sheet ถ้ามี หรือสร้างใหม่จาก JS ถ้าไม่มี
                 const messageToCopy = smsMessage || generateSMSMessage(petName, appointmentType);
+                // Encode message เพื่อใส่ใน data attribute (ป้องกัน quote แตก)
                 const safeMessage = encodeURIComponent(messageToCopy);
 
                 return `
@@ -380,7 +337,7 @@
                             <p class="font-bold text-lg text-gray-800 pr-10">${petName}</p>
                             <div class="flex items-center space-x-1">
                                 <button class="copy-btn action-btn" title="คัดลอกข้อความ SMS"><i class="fa-regular fa-copy"></i></button>
-                                <div class="w-px h-4 bg-gray-300 mx-1"></div>
+                                <div class="w-px h-4 bg-gray-300 mx-1"></div> <!-- Divider -->
                                 <button class="edit-btn action-btn text-gray-500 hover:text-blue-600" aria-label="Edit"><i class="fa-solid fa-pencil"></i></button>
                                 <button class="delete-btn action-btn text-gray-500 hover:text-red-600" aria-label="Delete"><i class="fa-solid fa-trash"></i></button>
                             </div>
@@ -403,6 +360,11 @@
                         <div class="bg-gray-200 h-4 w-2/3 mb-2 rounded"></div>
                         <div class="flex gap-4"><div class="bg-gray-200 h-4 w-1/4 rounded"></div><div class="bg-gray-200 h-4 w-1/4 rounded"></div></div>
                      </div>
+                     <div class="border border-gray-200 rounded-xl p-4 animate-pulse">
+                        <div class="flex justify-between mb-2"><div class="bg-gray-200 h-6 w-1/3 rounded"></div><div class="bg-gray-200 h-6 w-8 rounded"></div></div>
+                        <div class="bg-gray-200 h-4 w-2/3 mb-2 rounded"></div>
+                        <div class="flex gap-4"><div class="bg-gray-200 h-4 w-1/4 rounded"></div><div class="bg-gray-200 h-4 w-1/4 rounded"></div></div>
+                     </div>
                 </div>`;
         }
 
@@ -415,150 +377,30 @@
                 }
             });
 
+            const phoneInput = document.getElementById('phoneNumber');
             const phoneValidationMessage = document.getElementById('phone-validation-message');
-            const phoneValue = phoneInput.value;
-            const phoneRegex = /^0\d{9}$/;
-
-            if (phoneValue.length > 0) {
-                if (!phoneRegex.test(phoneValue)) {
-                    isFormValid = false;
-                    phoneInput.classList.add('invalid');
-                    phoneValidationMessage.style.display = 'block';
-
-                    if (!phoneValue.startsWith('0')) {
-                        phoneValidationMessage.textContent = 'เบอร์โทรศัพท์ต้องขึ้นต้นด้วย 0';
-                    } else if (phoneValue.length < 10) {
-                        phoneValidationMessage.textContent = 'กรุณากรอกเบอร์โทรศัพท์ให้ครบ 10 หลัก';
-                    } else {
-                         phoneValidationMessage.textContent = 'รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง';
-                    }
-                } else {
-                    phoneInput.classList.remove('invalid');
-                    phoneValidationMessage.style.display = 'none';
-                }
+            if (phoneInput.value.length > 0 && phoneInput.value.length < 10) {
+                isFormValid = false;
+                phoneInput.classList.add('invalid');
+                phoneValidationMessage.style.display = 'block';
             } else {
                 phoneInput.classList.remove('invalid');
                 phoneValidationMessage.style.display = 'none';
             }
-
-            submitBtn.disabled = !isFormValid;
-        }
-
-        // --- AUTOCOMPLETE LOGIC ---
-        function setupAutocomplete() {
-            // Close when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.input-with-icon')) {
-                    phoneList.style.display = 'none';
-                    petList.style.display = 'none';
-                }
-            });
-
-            // Phone Input Listener
-            phoneInput.addEventListener('input', function(e) {
-                // Also handle validation logic here to ensure order
-                this.value = this.value.replace(/[^0-9]/g, '');
-                validateForm();
-
-                const value = this.value.trim();
-                if (value.length < 3) {
-                    phoneList.style.display = 'none';
-                    return;
-                }
-                
-                const matches = [];
-                const seen = new Set();
-
-                // Check appState.allRows for history
-                appState.allRows.forEach(row => {
-                    if (row.phone.includes(value)) {
-                        const key = `${row.phone}|${row.petName}`;
-                        if (!seen.has(key)) {
-                            seen.add(key);
-                            matches.push(row);
-                        }
-                    }
-                });
-
-                renderSuggestions(phoneList, matches.slice(0, 5), 'phone');
-            });
-
-            // Pet Input Listener
-            petInput.addEventListener('input', function() {
-                validateForm();
-                const value = this.value.trim().toLowerCase();
-                if (value.length < 2) {
-                    petList.style.display = 'none';
-                    return;
-                }
-                
-                const matches = [];
-                const seen = new Set();
-
-                appState.allRows.forEach(row => {
-                    if (row.petName.toLowerCase().includes(value)) {
-                        const key = `${row.phone}|${row.petName}`;
-                        if (!seen.has(key)) {
-                            seen.add(key);
-                            matches.push(row);
-                        }
-                    }
-                });
-
-                renderSuggestions(petList, matches.slice(0, 5), 'pet');
-            });
-        }
-
-        function renderSuggestions(container, items, type) {
-            if (items.length === 0) {
-                container.style.display = 'none';
-                return;
+            
+            if (phoneInput.value.length === 10) {
+                 phoneInput.classList.remove('invalid');
+                 phoneValidationMessage.style.display = 'none';
             }
 
-            container.innerHTML = items.map(item => {
-                const mainText = type === 'phone' ? item.phone : item.petName;
-                const subText = type === 'phone' ? item.petName : item.phone;
-                // Escape simple quotes for onclick
-                const safePet = item.petName.replace(/'/g, "\\'");
-                const safePhone = item.phone;
-                
-                return `
-                    <div class="suggestion-item" onclick="fillForm('${safePet}', '${safePhone}')">
-                        <div class="suggestion-main">${mainText}</div>
-                        <div class="suggestion-sub">
-                            <i class="${type === 'phone' ? 'fa-solid fa-dog' : 'fa-solid fa-mobile-screen-button'} mr-2 text-gray-400"></i> 
-                            ${subText}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            container.style.display = 'block';
-        }
-
-        // Global function for onclick (attached to window to be accessible)
-        window.fillForm = function(pet, phone) {
-            petInput.value = pet;
-            phoneInput.value = phone;
-            
-            phoneList.style.display = 'none';
-            petList.style.display = 'none';
-            
-            validateForm(); // Re-validate after filling
+            submitBtn.disabled = !isFormValid;
         }
 
         // --- DATA FETCHING & ACTIONS ---
         async function loadDashboard() {
             showSkeletonLoading();
             try {
-                // ADDED: Force No-Cache Headers to browser
-                const response = await fetch(`${GVIZ_URL}&t=${new Date().getTime()}`, {
-                    headers: {
-                        'Pragma': 'no-cache',
-                        'Cache-Control': 'no-cache'
-                    }
-                });
-                
+                const response = await fetch(`${GVIZ_URL}&t=${new Date().getTime()}`);
                 if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
                 const text = await response.text();
                 
@@ -571,18 +413,15 @@
 
                 const jsonString = text.substring(startIndex + 1, endIndex);
                 const jsonData = JSON.parse(jsonString);
-                
-                // Update Timestamp UI
-                const now = new Date();
-                const timeString = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-                lastUpdatedEl.textContent = `อัปเดต: ${timeString}`;
 
                 if (!jsonData.table || !jsonData.table.rows) {
+                    // Handle empty sheet case
                     appState.allRows = [];
                     renderDashboard([]);
                     return;
                 }
                 
+                // Process rows and store in state
                 appState.allRows = jsonData.table.rows.map((row, index) => {
                     return {
                         rowNumber: index + 2,
@@ -590,9 +429,10 @@
                         phone: (row.c[1]?.v || 'N/A').replace(/'/g, ''),
                         petName: row.c[2]?.v || 'N/A',
                         appointmentType: row.c[3]?.v || 'N/A',
+                        // ดึงข้อมูลคอลัมน์ F (index 5) ซึ่งคือ "รวมข้อความ" จาก Sheet ถ้ามี
                         smsMessage: row.c[5]?.v || '' 
                     };
-                }).reverse();
+                }).reverse(); // Newest first
 
                 renderDashboard(appState.allRows);
             } catch (error) {
@@ -607,6 +447,7 @@
             }
         }
         
+        // Search Functionality
         searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
             const filteredRows = appState.allRows.filter(row => {
@@ -615,6 +456,9 @@
             });
             renderDashboard(filteredRows);
         });
+        
+        // Date Input Listener
+        sendDateInput.addEventListener('change', updateDatePreview);
 
         function enterEditMode(item) {
             appState.isEditing = true;
@@ -623,10 +467,9 @@
             form.elements.petName.value = item.dataset.petName;
             form.elements.phoneNumber.value = item.dataset.phone;
             form.elements.appointmentType.value = item.dataset.appointmentType;
-            
             const gregorianDate = convertBuddhistToGregorian(item.dataset.sendDate);
             if (gregorianDate) {
-                datePicker.setDate(gregorianDate);
+                form.elements.sendDate.value = gregorianDate.toISOString().split('T')[0];
             }
 
             updateFormUI();
@@ -637,46 +480,23 @@
             appState.isEditing = false;
             appState.editingRowNumber = null;
             form.reset();
-            datePicker.setDate(new Date());
+            document.getElementById('sendDate').valueAsDate = new Date();
             updateFormUI();
         }
 
         function handleDelete(rowNumber) {
-            rowNumber = parseInt(rowNumber);
             Swal.fire({
                 title: 'คุณแน่ใจหรือไม่?', text: "คุณต้องการลบข้อมูลนี้ใช่ไหม", icon: 'warning',
                 showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6',
                 confirmButtonText: 'ใช่, ลบเลย!', cancelButtonText: 'ยกเลิก'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Pass the rowNumber and action to callAppsScript
-                    callAppsScript({ action: 'delete', rowNumber: rowNumber }, 'กำลังลบข้อมูล...', () => {
-                        // Optimistic UI Update: Remove from local state immediately
-                        appState.allRows = appState.allRows.filter(r => r.rowNumber !== rowNumber);
-                        
-                        // Shift row numbers for items below the deleted one to keep consistency
-                        // (Important because Google Sheets will shift rows up)
-                        appState.allRows.forEach(row => {
-                            if (row.rowNumber > rowNumber) {
-                                row.rowNumber--;
-                            }
-                        });
-
-                        // Re-render immediately
-                        const searchTerm = searchInput.value.trim().toLowerCase();
-                        if (searchTerm) {
-                             const filtered = appState.allRows.filter(row => row.petName.toLowerCase().includes(searchTerm) || row.phone.includes(searchTerm));
-                             renderDashboard(filtered);
-                        } else {
-                             renderDashboard(appState.allRows);
-                        }
-                    });
+                    callAppsScript({ action: 'delete', rowNumber: rowNumber }, 'กำลังลบข้อมูล...');
                 }
             });
         }
 
-        // Updated callAppsScript to accept onSuccess callback
-        function callAppsScript(data, loadingText, onSuccess) {
+        function callAppsScript(data, loadingText) {
             Swal.fire({ title: loadingText, text: 'กรุณารอสักครู่...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             const callbackName = 'jsonp_callback_' + Date.now();
@@ -688,14 +508,8 @@
                 
                 if (response.result === 'success') {
                     Swal.fire({ icon: 'success', title: 'สำเร็จ!', timer: 1500, showConfirmButton: false });
-                    
-                    if (data.action === 'delete' && onSuccess) {
-                        onSuccess();
-                    } else {
-                        // For create/update, standard reload is fine
-                        exitEditMode();
-                        loadDashboard();
-                    }
+                    exitEditMode();
+                    loadDashboard();
                 } else {
                     handleError(new Error(response.error || 'Unknown error from server.'));
                 }
@@ -726,11 +540,13 @@
             const action = appState.isEditing ? 'update' : 'create';
             const loadingText = appState.isEditing ? 'กำลังอัปเดต...' : 'กำลังบันทึก...';
             
+            // DUPLICATE CHECK LOGIC (Start)
             if (!appState.isEditing) {
                 const petNameInput = form.elements.petName.value.trim();
                 const sendDateInput = form.elements.sendDate.value;
                 const formattedSendDate = convertToBuddhistEra(sendDateInput);
 
+                // Check if duplicate exists
                 const duplicate = appState.allRows.find(row => 
                     row.petName.trim() === petNameInput && 
                     row.formattedDate === formattedSendDate
@@ -748,6 +564,7 @@
                         cancelButtonText: 'ยกเลิก'
                     }).then((result) => {
                         if (result.isConfirmed) {
+                            // User confirmed duplicate save
                              const data = {
                                 action: action,
                                 sendDate: formattedSendDate,
@@ -759,9 +576,10 @@
                             callAppsScript(data, loadingText);
                         }
                     });
-                    return; 
+                    return; // Stop execution, waiting for user decision
                 }
             }
+            // DUPLICATE CHECK LOGIC (End)
             
             const data = {
                 action: action,
@@ -779,11 +597,12 @@
             const item = e.target.closest('.dashboard-item');
             if (!item) return;
             
+            // Handle Copy Button
             const copyBtn = e.target.closest('.copy-btn');
             if (copyBtn) {
                 const message = decodeURIComponent(item.dataset.message);
                 copyToClipboard(message);
-                return;
+                return; // Stop propagation to prevent edit/delete checks
             }
 
             if (e.target.closest('.edit-btn')) enterEditMode(item);
@@ -793,16 +612,10 @@
         requiredInputs.forEach(input => {
             input.addEventListener('input', validateForm);
         });
-        
-        datePicker.config.onChange.push(function() {
-            validateForm();
-        });
 
         // --- INITIAL LOAD ---
-        setupAutocomplete(); // Enable autocomplete
         exitEditMode();
         loadDashboard();
     </script>
 </body>
 </html>
-```eof
