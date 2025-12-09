@@ -80,6 +80,8 @@
         .suggestion-item:hover { background-color: #f0f9ff; }
         .suggestion-main { font-weight: 600; color: #1f2937; }
         .suggestion-sub { font-size: 0.875rem; color: #6b7280; display: flex; align-items: center; }
+        
+        .last-updated { font-size: 0.75rem; color: #6b7280; margin-right: 8px; }
     </style>
 </head>
 <body class="min-h-screen">
@@ -184,10 +186,14 @@
                         <i class="fa-solid fa-clock-rotate-left mr-3 text-blue-600"></i>
                         รายการข้อมูล
                     </h2>
-                    <!-- Refresh Button -->
-                    <button onclick="loadDashboard()" class="text-gray-400 hover:text-blue-600 transition p-2 rounded-full hover:bg-gray-100" title="รีเฟรชข้อมูล">
-                        <i class="fa-solid fa-rotate-right"></i>
-                    </button>
+                    
+                    <div class="flex items-center">
+                        <span id="last-updated" class="last-updated hidden sm:inline"></span>
+                        <!-- Refresh Button -->
+                        <button onclick="loadDashboard()" class="text-gray-400 hover:text-blue-600 transition p-2 rounded-full hover:bg-gray-100" title="รีเฟรชข้อมูล (กดเมื่อข้อมูลไม่ตรง)">
+                            <i class="fa-solid fa-rotate-right"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Search Bar -->
@@ -233,6 +239,7 @@
         const petInput = document.getElementById('petName');
         const phoneList = document.getElementById('phone-suggestions');
         const petList = document.getElementById('pet-suggestions');
+        const lastUpdatedEl = document.getElementById('last-updated');
         
         // --- INITIALIZE FLATPICKR ---
         const datePicker = flatpickr("#sendDate", {
@@ -544,7 +551,14 @@
         async function loadDashboard() {
             showSkeletonLoading();
             try {
-                const response = await fetch(`${GVIZ_URL}&t=${new Date().getTime()}`);
+                // ADDED: Force No-Cache Headers to browser
+                const response = await fetch(`${GVIZ_URL}&t=${new Date().getTime()}`, {
+                    headers: {
+                        'Pragma': 'no-cache',
+                        'Cache-Control': 'no-cache'
+                    }
+                });
+                
                 if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
                 const text = await response.text();
                 
@@ -557,6 +571,11 @@
 
                 const jsonString = text.substring(startIndex + 1, endIndex);
                 const jsonData = JSON.parse(jsonString);
+                
+                // Update Timestamp UI
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+                lastUpdatedEl.textContent = `อัปเดต: ${timeString}`;
 
                 if (!jsonData.table || !jsonData.table.rows) {
                     appState.allRows = [];
@@ -623,18 +642,41 @@
         }
 
         function handleDelete(rowNumber) {
+            rowNumber = parseInt(rowNumber);
             Swal.fire({
                 title: 'คุณแน่ใจหรือไม่?', text: "คุณต้องการลบข้อมูลนี้ใช่ไหม", icon: 'warning',
                 showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6',
                 confirmButtonText: 'ใช่, ลบเลย!', cancelButtonText: 'ยกเลิก'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    callAppsScript({ action: 'delete', rowNumber: rowNumber }, 'กำลังลบข้อมูล...');
+                    // Pass the rowNumber and action to callAppsScript
+                    callAppsScript({ action: 'delete', rowNumber: rowNumber }, 'กำลังลบข้อมูล...', () => {
+                        // Optimistic UI Update: Remove from local state immediately
+                        appState.allRows = appState.allRows.filter(r => r.rowNumber !== rowNumber);
+                        
+                        // Shift row numbers for items below the deleted one to keep consistency
+                        // (Important because Google Sheets will shift rows up)
+                        appState.allRows.forEach(row => {
+                            if (row.rowNumber > rowNumber) {
+                                row.rowNumber--;
+                            }
+                        });
+
+                        // Re-render immediately
+                        const searchTerm = searchInput.value.trim().toLowerCase();
+                        if (searchTerm) {
+                             const filtered = appState.allRows.filter(row => row.petName.toLowerCase().includes(searchTerm) || row.phone.includes(searchTerm));
+                             renderDashboard(filtered);
+                        } else {
+                             renderDashboard(appState.allRows);
+                        }
+                    });
                 }
             });
         }
 
-        function callAppsScript(data, loadingText) {
+        // Updated callAppsScript to accept onSuccess callback
+        function callAppsScript(data, loadingText, onSuccess) {
             Swal.fire({ title: loadingText, text: 'กรุณารอสักครู่...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             const callbackName = 'jsonp_callback_' + Date.now();
@@ -646,8 +688,14 @@
                 
                 if (response.result === 'success') {
                     Swal.fire({ icon: 'success', title: 'สำเร็จ!', timer: 1500, showConfirmButton: false });
-                    exitEditMode();
-                    loadDashboard();
+                    
+                    if (data.action === 'delete' && onSuccess) {
+                        onSuccess();
+                    } else {
+                        // For create/update, standard reload is fine
+                        exitEditMode();
+                        loadDashboard();
+                    }
                 } else {
                     handleError(new Error(response.error || 'Unknown error from server.'));
                 }
