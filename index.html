@@ -551,8 +551,9 @@
         async function loadDashboard() {
             showSkeletonLoading();
             try {
-                // ADDED: Force No-Cache Headers to browser
-                const response = await fetch(`${GVIZ_URL}&t=${new Date().getTime()}`, {
+                // ADDED: Random parameter to force cache bypass from Google's side
+                const randomParam = Math.floor(Math.random() * 999999);
+                const response = await fetch(`${GVIZ_URL}&t=${new Date().getTime()}&_=${randomParam}`, {
                     headers: {
                         'Pragma': 'no-cache',
                         'Cache-Control': 'no-cache'
@@ -597,13 +598,9 @@
                 renderDashboard(appState.allRows);
             } catch (error) {
                 console.error('Error loading dashboard:', error);
-                dashboard.innerHTML = `
-                    <div class="text-center py-8 bg-red-50 p-4 rounded-lg border border-red-200">
-                        <i class="fa-solid fa-circle-exclamation text-4xl text-red-500"></i>
-                        <p class="text-red-700 mt-4 font-bold">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
-                        <p class="text-red-600 mt-2 text-sm">กรุณาตรวจสอบการเชื่อมต่อหรือการตั้งค่าแชร์</p>
-                    </div>
-                `;
+                // If parsing fails (empty sheet), clear dashboard
+                appState.allRows = [];
+                renderDashboard([]);
             }
         }
         
@@ -651,32 +648,48 @@
                 if (result.isConfirmed) {
                     // Pass the rowNumber and action to callAppsScript
                     callAppsScript({ action: 'delete', rowNumber: rowNumber }, 'กำลังลบข้อมูล...', () => {
-                        // Optimistic UI Update: Remove from local state immediately
-                        appState.allRows = appState.allRows.filter(r => r.rowNumber !== rowNumber);
-                        
-                        // Shift row numbers for items below the deleted one to keep consistency
-                        // (Important because Google Sheets will shift rows up)
-                        appState.allRows.forEach(row => {
-                            if (row.rowNumber > rowNumber) {
-                                row.rowNumber--;
-                            }
+                        // Success callback: Optimistically remove from UI
+                        removeFromLocalState(rowNumber);
+                    }, () => {
+                        // Error callback: Force removal anyway because data is likely out of sync
+                         Swal.fire({
+                            icon: 'warning',
+                            title: 'ข้อมูลอาจไม่ตรงกัน',
+                            text: 'ระบบจะรีเฟรชข้อมูลเพื่อความถูกต้อง',
+                            timer: 2000,
+                            showConfirmButton: false
                         });
-
-                        // Re-render immediately
-                        const searchTerm = searchInput.value.trim().toLowerCase();
-                        if (searchTerm) {
-                             const filtered = appState.allRows.filter(row => row.petName.toLowerCase().includes(searchTerm) || row.phone.includes(searchTerm));
-                             renderDashboard(filtered);
-                        } else {
-                             renderDashboard(appState.allRows);
-                        }
+                        removeFromLocalState(rowNumber);
+                        // Trigger reload after a short delay
+                        setTimeout(loadDashboard, 1000);
                     });
                 }
             });
         }
+        
+        function removeFromLocalState(rowNumber) {
+             // Optimistic UI Update: Remove from local state immediately
+            appState.allRows = appState.allRows.filter(r => r.rowNumber !== rowNumber);
+            
+            // Shift row numbers for items below the deleted one to keep consistency
+            appState.allRows.forEach(row => {
+                if (row.rowNumber > rowNumber) {
+                    row.rowNumber--;
+                }
+            });
 
-        // Updated callAppsScript to accept onSuccess callback
-        function callAppsScript(data, loadingText, onSuccess) {
+            // Re-render immediately
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            if (searchTerm) {
+                    const filtered = appState.allRows.filter(row => row.petName.toLowerCase().includes(searchTerm) || row.phone.includes(searchTerm));
+                    renderDashboard(filtered);
+            } else {
+                    renderDashboard(appState.allRows);
+            }
+        }
+
+        // Updated callAppsScript to accept onSuccess AND onError callbacks
+        function callAppsScript(data, loadingText, onSuccess, onError) {
             Swal.fire({ title: loadingText, text: 'กรุณารอสักครู่...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             const callbackName = 'jsonp_callback_' + Date.now();
@@ -697,20 +710,29 @@
                         loadDashboard();
                     }
                 } else {
-                    handleError(new Error(response.error || 'Unknown error from server.'));
+                    // If server returns error, trigger onError if provided
+                    if (onError) {
+                        onError(); 
+                    } else {
+                         handleError(new Error(response.error || 'Unknown error from server.'));
+                    }
                 }
             };
 
             const params = new URLSearchParams({ callback: callbackName, ...data });
             script.src = `${SCRIPT_URL}?${params.toString()}`;
-            script.onerror = () => handleError(new Error('Network error: Failed to load the script.'));
+            script.onerror = () => {
+                 if (onError) onError();
+                 else handleError(new Error('Network error: Failed to load the script.'));
+            };
             document.head.appendChild(script);
             
             setTimeout(() => {
                 if (window[callbackName]) {
                     document.head.removeChild(script);
                     delete window[callbackName];
-                    handleError(new Error('Request timed out. The server did not respond.'));
+                    if (onError) onError();
+                    else handleError(new Error('Request timed out. The server did not respond.'));
                 }
             }, 15000);
         }
@@ -805,4 +827,3 @@
     </script>
 </body>
 </html>
-```eof
