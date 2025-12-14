@@ -33,9 +33,13 @@
         .action-btn:hover { background-color: #e5e7eb; }
         .copy-btn { color: #059669; background-color: #ecfdf5; }
         .copy-btn:hover { background-color: #d1fae5; }
+        .copy-btn.copied { color: #6b7280; background-color: #f3f4f6; } /* Style for copied state */
         .form-input.invalid { border-color: #ef4444; }
         .validation-message { color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem; display: none; }
         #submitBtn:disabled { background-color: #9ca3af; cursor: not-allowed; transform: scale(1); box-shadow: none; }
+        
+        /* Filter Buttons */
+        .filter-btn.active { background-color: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
         
         /* Skeleton Loading Animation */
         @keyframes pulse {
@@ -181,19 +185,27 @@
 
             <!-- Dashboard Section -->
             <div class="card p-6 lg:p-8 h-fit">
-                <div class="flex justify-between items-center mb-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                     <h2 class="text-2xl font-bold text-gray-800 flex items-center">
                         <i class="fa-solid fa-clock-rotate-left mr-3 text-blue-600"></i>
                         รายการข้อมูล
                     </h2>
                     
-                    <div class="flex items-center">
+                    <div class="flex items-center self-end sm:self-auto">
+                        <span id="result-count" class="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full mr-2 hidden">0 รายการ</span>
                         <span id="last-updated" class="last-updated hidden sm:inline"></span>
                         <!-- Refresh Button -->
-                        <button onclick="loadDashboard()" class="text-gray-400 hover:text-blue-600 transition p-2 rounded-full hover:bg-gray-100" title="รีเฟรชข้อมูล (กดเมื่อข้อมูลไม่ตรง)">
+                        <button onclick="loadDashboard()" class="text-gray-400 hover:text-blue-600 transition p-2 rounded-full hover:bg-gray-100" title="รีเฟรชข้อมูล">
                             <i class="fa-solid fa-rotate-right"></i>
                         </button>
                     </div>
+                </div>
+
+                <!-- Quick Filters -->
+                <div class="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
+                    <button onclick="setFilter('all')" id="filter-all" class="filter-btn active px-4 py-2 rounded-full bg-white text-gray-600 border border-gray-200 font-medium text-sm whitespace-nowrap transition-colors hover:bg-gray-50">ทั้งหมด</button>
+                    <button onclick="setFilter('today')" id="filter-today" class="filter-btn px-4 py-2 rounded-full bg-white text-gray-600 border border-gray-200 font-medium text-sm whitespace-nowrap transition-colors hover:bg-gray-50"><i class="fa-solid fa-calendar-day mr-1 text-yellow-500"></i> นัดวันนี้</button>
+                    <button onclick="setFilter('tomorrow')" id="filter-tomorrow" class="filter-btn px-4 py-2 rounded-full bg-white text-gray-600 border border-gray-200 font-medium text-sm whitespace-nowrap transition-colors hover:bg-gray-50"><i class="fa-solid fa-calendar-plus mr-1 text-green-500"></i> นัดพรุ่งนี้</button>
                 </div>
 
                 <!-- Search Bar -->
@@ -227,7 +239,6 @@
     <script>
         // --- CONFIGURATION ---
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwtzEUk2yuCCoxrd53YRXfgN9cP6rtr3ixeLr9iD7aRNjuvx9TMk76Rq50hPpvYuyV/exec"; 
-        // เปลี่ยนชื่อชีตเป็น SMS ใน URL ของ GVIZ
         const GVIZ_URL = "https://docs.google.com/spreadsheets/d/1UltCx_5u19F675ELpi7OUAxQJFh6UkbD6Qq__jQoL5Q/gviz/tq?tqx=out:json&sheet=SMS";
 
         // --- DOM ELEMENTS ---
@@ -241,6 +252,7 @@
         const phoneList = document.getElementById('phone-suggestions');
         const petList = document.getElementById('pet-suggestions');
         const lastUpdatedEl = document.getElementById('last-updated');
+        const resultCountEl = document.getElementById('result-count');
         
         // --- INITIALIZE FLATPICKR ---
         const datePicker = flatpickr("#sendDate", {
@@ -257,6 +269,8 @@
             isEditing: false,
             editingRowNumber: null,
             allRows: [], 
+            currentFilter: 'all',
+            copiedRows: new Set() // Track copied items per session
         };
 
         // --- HELPER FUNCTIONS ---
@@ -288,7 +302,7 @@
             return 'past';
         }
 
-        function copyToClipboard(text) {
+        function copyToClipboard(text, btnElement, rowNumber) {
             const textarea = document.createElement('textarea');
             textarea.value = text;
             textarea.style.position = 'fixed'; 
@@ -302,7 +316,7 @@
                     toast: true,
                     position: 'top-end',
                     showConfirmButton: false,
-                    timer: 3000,
+                    timer: 2000,
                     timerProgressBar: true,
                     didOpen: (toast) => {
                         toast.addEventListener('mouseenter', Swal.stopTimer)
@@ -310,6 +324,15 @@
                     }
                 });
                 Toast.fire({ icon: 'success', title: 'คัดลอกข้อความแล้ว' });
+                
+                // Visual feedback
+                appState.copiedRows.add(rowNumber);
+                if (btnElement) {
+                    btnElement.classList.add('copied');
+                    btnElement.innerHTML = '<i class="fa-solid fa-check"></i>';
+                    btnElement.title = "คัดลอกแล้ว";
+                }
+
             } catch (err) {
                 Swal.fire({ icon: 'error', title: 'คัดลอกไม่สำเร็จ', text: 'เบราว์เซอร์ของคุณอาจไม่รองรับ' });
             }
@@ -319,6 +342,59 @@
         function generateSMSMessage(petName, appointmentType) {
             const apptName = appointmentType.split(' คำแนะนำ')[0];
             return `แจ้งเตือนนัดหมายน้อง ${petName} วันพรุ่งนี้\nนัด : ${apptName}\nหากต้องการเลื่อนนัด/สอบถาม โทร 0634461952 หรือ LINE: @SRNANIMALCARE\nโรงพยาบาลสัตว์สุราษฎร์ธานี (ใน บขส.ใหม่)`;
+        }
+
+        // --- FILTER FUNCTIONS ---
+        function setFilter(filterType) {
+            appState.currentFilter = filterType;
+            
+            // Update UI buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.remove('bg-blue-50', 'text-blue-600', 'border-blue-200');
+                btn.classList.add('bg-white', 'text-gray-600', 'border-gray-200');
+            });
+            
+            const activeBtn = document.getElementById(`filter-${filterType}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                activeBtn.classList.remove('bg-white', 'text-gray-600', 'border-gray-200');
+                activeBtn.classList.add('bg-blue-50', 'text-blue-600', 'border-blue-200');
+            }
+            
+            applyFiltersAndRender();
+        }
+
+        function applyFiltersAndRender() {
+            let filteredRows = appState.allRows;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // 1. Apply Date Filter
+            if (appState.currentFilter === 'today') {
+                filteredRows = filteredRows.filter(row => {
+                    const date = convertBuddhistToGregorian(row.formattedDate);
+                    return date && date.getTime() === today.getTime();
+                });
+            } else if (appState.currentFilter === 'tomorrow') {
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                filteredRows = filteredRows.filter(row => {
+                    const date = convertBuddhistToGregorian(row.formattedDate);
+                    return date && date.getTime() === tomorrow.getTime();
+                });
+            }
+
+            // 2. Apply Search Filter
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            if (searchTerm) {
+                filteredRows = filteredRows.filter(row => {
+                    return row.petName.toLowerCase().includes(searchTerm) || 
+                           row.phone.includes(searchTerm);
+                });
+            }
+
+            renderDashboard(filteredRows);
         }
 
         // --- UI UPDATE FUNCTIONS ---
@@ -350,17 +426,33 @@
         }
 
         function renderDashboard(rows) {
+            // Update counter
+            if (rows.length > 0) {
+                resultCountEl.textContent = `${rows.length} รายการ`;
+                resultCountEl.classList.remove('hidden');
+            } else {
+                resultCountEl.classList.add('hidden');
+            }
+
             if (!rows || rows.length === 0) {
                 dashboard.innerHTML = `
                     <div class="text-center py-8 flex flex-col items-center justify-center opacity-70">
                         <i class="fa-solid fa-folder-open text-5xl text-gray-300 mb-3"></i>
-                        <p class="text-gray-500">ไม่พบข้อมูล</p>
+                        <p class="text-gray-500">ไม่พบข้อมูลตามเงื่อนไข</p>
                     </div>`;
                 return;
             }
             
-            const isSearching = searchInput.value.trim().length > 0;
-            const rowsToDisplay = isSearching ? rows : rows.slice(0, 3);
+            // Logic: if filtering or searching, show all matches. If Default (All), show last 3.
+            // But if user explicitly clicks "All", they might expect all? 
+            // Let's stick to: Default load = last 3. Search/Filter = All matches.
+            
+            let rowsToDisplay = rows;
+            const isFiltering = appState.currentFilter !== 'all' || searchInput.value.trim().length > 0;
+            
+            if (!isFiltering) {
+                rowsToDisplay = rows.slice(0, 3);
+            }
 
             dashboard.innerHTML = '<div class="space-y-3">' + rowsToDisplay.map((row) => {
                 const { rowNumber, date, phone, petName, appointmentType, formattedDate, smsMessage } = row;
@@ -370,6 +462,11 @@
                 
                 const messageToCopy = smsMessage || generateSMSMessage(petName, appointmentType);
                 const safeMessage = encodeURIComponent(messageToCopy);
+                
+                const isCopied = appState.copiedRows.has(rowNumber);
+                const copyBtnClass = isCopied ? 'copy-btn action-btn copied' : 'copy-btn action-btn';
+                const copyBtnIcon = isCopied ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-regular fa-copy"></i>';
+                const copyBtnTitle = isCopied ? 'คัดลอกแล้ว' : 'คัดลอกข้อความ SMS';
 
                 return `
                     <div class="dashboard-item relative border border-gray-200 rounded-xl p-4 transition-all hover:shadow-lg hover:border-blue-500 hover:-translate-y-1 bg-white"
@@ -380,7 +477,7 @@
                         <div class="flex justify-between items-start">
                             <p class="font-bold text-lg text-gray-800 pr-10">${petName}</p>
                             <div class="flex items-center space-x-1">
-                                <button class="copy-btn action-btn" title="คัดลอกข้อความ SMS"><i class="fa-regular fa-copy"></i></button>
+                                <button class="${copyBtnClass}" title="${copyBtnTitle}">${copyBtnIcon}</button>
                                 <div class="w-px h-4 bg-gray-300 mx-1"></div>
                                 <button class="edit-btn action-btn text-gray-500 hover:text-blue-600" aria-label="Edit"><i class="fa-solid fa-pencil"></i></button>
                                 <button class="delete-btn action-btn text-gray-500 hover:text-red-600" aria-label="Delete"><i class="fa-solid fa-trash"></i></button>
@@ -552,7 +649,7 @@
         async function loadDashboard() {
             showSkeletonLoading();
             try {
-                // ADDED: Random parameter to force cache bypass from Google's side
+                // Random parameter to force cache bypass
                 const randomParam = Math.floor(Math.random() * 999999);
                 const response = await fetch(`${GVIZ_URL}&t=${new Date().getTime()}&_=${randomParam}`, {
                     headers: {
@@ -574,14 +671,13 @@
                 const jsonString = text.substring(startIndex + 1, endIndex);
                 const jsonData = JSON.parse(jsonString);
                 
-                // Update Timestamp UI
                 const now = new Date();
                 const timeString = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
                 lastUpdatedEl.textContent = `อัปเดต: ${timeString}`;
 
                 if (!jsonData.table || !jsonData.table.rows) {
                     appState.allRows = [];
-                    renderDashboard([]);
+                    applyFiltersAndRender(); // Render with empty state
                     return;
                 }
                 
@@ -596,22 +692,21 @@
                     };
                 }).reverse();
 
-                renderDashboard(appState.allRows);
+                applyFiltersAndRender();
             } catch (error) {
                 console.error('Error loading dashboard:', error);
-                // If parsing fails (empty sheet), clear dashboard
-                appState.allRows = [];
-                renderDashboard([]);
+                dashboard.innerHTML = `
+                    <div class="text-center py-8 bg-red-50 p-4 rounded-lg border border-red-200">
+                        <i class="fa-solid fa-circle-exclamation text-4xl text-red-500"></i>
+                        <p class="text-red-700 mt-4 font-bold">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
+                        <p class="text-red-600 mt-2 text-sm">กรุณาตรวจสอบการเชื่อมต่อหรือการตั้งค่าแชร์</p>
+                    </div>
+                `;
             }
         }
         
         searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            const filteredRows = appState.allRows.filter(row => {
-                return row.petName.toLowerCase().includes(searchTerm) || 
-                       row.phone.includes(searchTerm);
-            });
-            renderDashboard(filteredRows);
+            applyFiltersAndRender();
         });
 
         function enterEditMode(item) {
@@ -647,12 +742,15 @@
                 confirmButtonText: 'ใช่, ลบเลย!', cancelButtonText: 'ยกเลิก'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Pass the rowNumber and action to callAppsScript
                     callAppsScript({ action: 'delete', rowNumber: rowNumber }, 'กำลังลบข้อมูล...', () => {
-                        // Success callback: Optimistically remove from UI
-                        removeFromLocalState(rowNumber);
+                        // Optimistic Update
+                        appState.allRows = appState.allRows.filter(r => r.rowNumber !== rowNumber);
+                        // Fix remaining row numbers
+                        appState.allRows.forEach(row => {
+                            if (row.rowNumber > rowNumber) row.rowNumber--;
+                        });
+                        applyFiltersAndRender();
                     }, () => {
-                        // Error callback: Force removal anyway because data is likely out of sync
                          Swal.fire({
                             icon: 'warning',
                             title: 'ข้อมูลอาจไม่ตรงกัน',
@@ -660,33 +758,11 @@
                             timer: 2000,
                             showConfirmButton: false
                         });
-                        removeFromLocalState(rowNumber);
-                        // Trigger reload after a short delay
-                        setTimeout(loadDashboard, 1000);
+                        // Wait a bit then force reload
+                        setTimeout(loadDashboard, 1500);
                     });
                 }
             });
-        }
-        
-        function removeFromLocalState(rowNumber) {
-             // Optimistic UI Update: Remove from local state immediately
-            appState.allRows = appState.allRows.filter(r => r.rowNumber !== rowNumber);
-            
-            // Shift row numbers for items below the deleted one to keep consistency
-            appState.allRows.forEach(row => {
-                if (row.rowNumber > rowNumber) {
-                    row.rowNumber--;
-                }
-            });
-
-            // Re-render immediately
-            const searchTerm = searchInput.value.trim().toLowerCase();
-            if (searchTerm) {
-                    const filtered = appState.allRows.filter(row => row.petName.toLowerCase().includes(searchTerm) || row.phone.includes(searchTerm));
-                    renderDashboard(filtered);
-            } else {
-                    renderDashboard(appState.allRows);
-            }
         }
 
         // Updated callAppsScript to accept onSuccess AND onError callbacks
@@ -711,12 +787,8 @@
                         loadDashboard();
                     }
                 } else {
-                    // If server returns error, trigger onError if provided
-                    if (onError) {
-                        onError(); 
-                    } else {
-                         handleError(new Error(response.error || 'Unknown error from server.'));
-                    }
+                    if (onError) onError(); 
+                    else handleError(new Error(response.error || 'Unknown error from server.'));
                 }
             };
 
@@ -805,7 +877,7 @@
             const copyBtn = e.target.closest('.copy-btn');
             if (copyBtn) {
                 const message = decodeURIComponent(item.dataset.message);
-                copyToClipboard(message);
+                copyToClipboard(message, copyBtn, item.dataset.rowNumber);
                 return;
             }
 
@@ -822,7 +894,8 @@
         });
 
         // --- INITIAL LOAD ---
-        setupAutocomplete(); // Enable autocomplete
+        setFilter('all'); // Set default filter UI
+        setupAutocomplete(); 
         exitEditMode();
         loadDashboard();
     </script>
