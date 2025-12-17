@@ -239,7 +239,7 @@
     <script>
         // --- CONFIGURATION ---
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwtzEUk2yuCCoxrd53YRXfgN9cP6rtr3ixeLr9iD7aRNjuvx9TMk76Rq50hPpvYuyV/exec"; 
-        const GVIZ_URL = "https://docs.google.com/spreadsheets/d/1UltCx_5u19F675ELpi7OUAxQJFh6UkbD6Qq__jQoL5Q/gviz/tq?tqx=out:json&sheet=SMS";
+        const GVIZ_URL = "https://docs.google.com/spreadsheets/d/1UltCx_5u19F675ELpi7OUAxQJFh6UkbD6Qq__jQoL5Q/gviz/tq?tqx=out:json&sheet=DATA";
 
         // --- DOM ELEMENTS ---
         const form = document.getElementById('smsForm');
@@ -254,6 +254,19 @@
         const lastUpdatedEl = document.getElementById('last-updated');
         const resultCountEl = document.getElementById('result-count');
         
+        // --- TOAST NOTIFICATION CONFIG ---
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
         // --- INITIALIZE FLATPICKR ---
         const datePicker = flatpickr("#sendDate", {
             locale: "th",
@@ -312,17 +325,6 @@
             
             try {
                 document.execCommand('copy');
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 2000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener('mouseenter', Swal.stopTimer)
-                        toast.addEventListener('mouseleave', Swal.resumeTimer)
-                    }
-                });
                 Toast.fire({ icon: 'success', title: 'คัดลอกข้อความแล้ว' });
                 
                 // Visual feedback
@@ -442,10 +444,6 @@
                     </div>`;
                 return;
             }
-            
-            // Logic: if filtering or searching, show all matches. If Default (All), show last 3.
-            // But if user explicitly clicks "All", they might expect all? 
-            // Let's stick to: Default load = last 3. Search/Filter = All matches.
             
             let rowsToDisplay = rows;
             const isFiltering = appState.currentFilter !== 'all' || searchInput.value.trim().length > 0;
@@ -695,13 +693,9 @@
                 applyFiltersAndRender();
             } catch (error) {
                 console.error('Error loading dashboard:', error);
-                dashboard.innerHTML = `
-                    <div class="text-center py-8 bg-red-50 p-4 rounded-lg border border-red-200">
-                        <i class="fa-solid fa-circle-exclamation text-4xl text-red-500"></i>
-                        <p class="text-red-700 mt-4 font-bold">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
-                        <p class="text-red-600 mt-2 text-sm">กรุณาตรวจสอบการเชื่อมต่อหรือการตั้งค่าแชร์</p>
-                    </div>
-                `;
+                // If parsing fails (empty sheet), clear dashboard
+                appState.allRows = [];
+                applyFiltersAndRender();
             }
         }
         
@@ -742,15 +736,13 @@
                 confirmButtonText: 'ใช่, ลบเลย!', cancelButtonText: 'ยกเลิก'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    // Pass the rowNumber and action to callAppsScript
                     callAppsScript({ action: 'delete', rowNumber: rowNumber }, 'กำลังลบข้อมูล...', () => {
-                        // Optimistic Update
-                        appState.allRows = appState.allRows.filter(r => r.rowNumber !== rowNumber);
-                        // Fix remaining row numbers
-                        appState.allRows.forEach(row => {
-                            if (row.rowNumber > rowNumber) row.rowNumber--;
-                        });
-                        applyFiltersAndRender();
+                        // Success callback: Optimistically remove from UI
+                        removeFromLocalState(rowNumber);
+                        Toast.fire({ icon: 'success', title: 'ลบข้อมูลเรียบร้อยแล้ว' });
                     }, () => {
+                        // Error callback: Force removal anyway because data is likely out of sync
                          Swal.fire({
                             icon: 'warning',
                             title: 'ข้อมูลอาจไม่ตรงกัน',
@@ -758,15 +750,31 @@
                             timer: 2000,
                             showConfirmButton: false
                         });
-                        // Wait a bit then force reload
-                        setTimeout(loadDashboard, 1500);
+                        removeFromLocalState(rowNumber);
+                        // Trigger reload after a short delay
+                        setTimeout(loadDashboard, 1000);
                     });
                 }
             });
         }
+        
+        function removeFromLocalState(rowNumber) {
+             // Optimistic UI Update: Remove from local state immediately
+            appState.allRows = appState.allRows.filter(r => r.rowNumber !== rowNumber);
+            
+            // Shift row numbers for items below the deleted one to keep consistency
+            appState.allRows.forEach(row => {
+                if (row.rowNumber > rowNumber) {
+                    row.rowNumber--;
+                }
+            });
+
+            applyFiltersAndRender();
+        }
 
         // Updated callAppsScript to accept onSuccess AND onError callbacks
         function callAppsScript(data, loadingText, onSuccess, onError) {
+            // Show loading
             Swal.fire({ title: loadingText, text: 'กรุณารอสักครู่...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             const callbackName = 'jsonp_callback_' + Date.now();
@@ -776,13 +784,21 @@
                 document.head.removeChild(script);
                 delete window[callbackName];
                 
+                // Close loading modal
+                Swal.close();
+
                 if (response.result === 'success') {
-                    Swal.fire({ icon: 'success', title: 'สำเร็จ!', timer: 1500, showConfirmButton: false });
                     
                     if (data.action === 'delete' && onSuccess) {
                         onSuccess();
                     } else {
-                        // For create/update, standard reload is fine
+                        // For create/update: Success Toast
+                        Toast.fire({ 
+                            icon: 'success', 
+                            title: data.action === 'update' ? 'อัปเดตข้อมูลเรียบร้อยแล้ว' : 'บันทึกข้อมูลเรียบร้อยแล้ว' 
+                        });
+                        
+                        // Standard reload/reset
                         exitEditMode();
                         loadDashboard();
                     }
