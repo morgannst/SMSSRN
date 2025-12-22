@@ -4,147 +4,119 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบเตรียมข้อมูลส่ง SMS - โรงพยาบาลสัตว์สุราษฏร์ธานี</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Flatpickr (CSS & Theme) -->
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_blue.css">
 
     <style>
         body { font-family: 'Sarabun', sans-serif; background-color: #f0f4f8; }
-        .card { background-color: #ffffff; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.1); border: 1px solid #e5e7eb; }
+        
+        /* Components */
+        .card { background-color: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e5e7eb; }
         .form-input {
             width: 100%; border-radius: 0.75rem; border: 1px solid #d1d5db;
-            padding: 0.75rem 1rem 0.75rem 2.75rem; transition: all 0.3s;
-            background-color: white; /* Ensure bg is white for flatpickr */
+            padding: 0.75rem 1rem 0.75rem 2.75rem; transition: all 0.2s;
+            background-color: white;
         }
-        .form-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); outline: none; }
+        .form-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); outline: none; }
+        .form-input.invalid { border-color: #ef4444; }
+        
         .input-with-icon { position: relative; }
         .input-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #9ca3af; z-index: 10; }
-        .swal2-popup { font-family: 'Sarabun', sans-serif; }
-        .action-btn { background-color: transparent; border: none; cursor: pointer; padding: 0.5rem; border-radius: 50%; transition: background-color 0.2s; }
-        .action-btn:hover { background-color: #e5e7eb; }
+        
+        .action-btn { background: transparent; border: none; padding: 0.5rem; border-radius: 9999px; transition: background 0.2s; cursor: pointer; }
+        .action-btn:hover { background-color: #f3f4f6; }
+        
         .copy-btn { color: #059669; background-color: #ecfdf5; }
         .copy-btn:hover { background-color: #d1fae5; }
-        .copy-btn.copied { color: #6b7280; background-color: #f3f4f6; } /* Style for copied state */
-        .form-input.invalid { border-color: #ef4444; }
-        .validation-message { color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem; display: none; }
-        #submitBtn:disabled { background-color: #9ca3af; cursor: not-allowed; transform: scale(1); box-shadow: none; }
-        
-        /* Filter Buttons */
-        .filter-btn.active { background-color: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
-        
-        /* Skeleton Loading Animation */
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: .5; }
-        }
-        .skeleton {
-            background-color: #e5e7eb;
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-            border-radius: 0.5rem;
-        }
-        
-        /* Flatpickr Customization */
-        .flatpickr-calendar { font-family: 'Sarabun', sans-serif; }
+        .copy-btn.copied { color: #6b7280; background-color: #f3f4f6; }
 
-        /* Autocomplete Suggestions Styles */
+        .validation-message { color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: none; }
+        button:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        /* Filter & Autocomplete */
+        .filter-btn.active { background-color: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+        
         .suggestions-list {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.75rem;
+            position: absolute; top: 100%; left: 0; right: 0;
+            background: white; border: 1px solid #e5e7eb; border-radius: 0.75rem;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            z-index: 50;
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 4px;
-            display: none; /* Hidden by default */
+            z-index: 50; max-height: 200px; overflow-y: auto; margin-top: 4px; display: none;
         }
         .suggestion-item {
-            padding: 0.75rem 1rem;
-            cursor: pointer;
-            border-bottom: 1px solid #f3f4f6;
-            transition: background-color 0.2s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 0.75rem 1rem; cursor: pointer; border-bottom: 1px solid #f3f4f6;
+            display: flex; justify-content: space-between; align-items: center;
         }
-        .suggestion-item:last-child { border-bottom: none; }
-        .suggestion-item:hover { background-color: #f0f9ff; }
-        .suggestion-main { font-weight: 600; color: #1f2937; }
-        .suggestion-sub { font-size: 0.875rem; color: #6b7280; display: flex; align-items: center; }
+        .suggestion-item:hover { background-color: #f9fafb; }
         
-        .last-updated { font-size: 0.75rem; color: #6b7280; margin-right: 8px; }
+        /* Skeleton */
+        @keyframes pulse { 50% { opacity: .5; } }
+        .skeleton { background-color: #e5e7eb; animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; border-radius: 0.5rem; }
+        
+        .flatpickr-calendar { font-family: 'Sarabun', sans-serif; }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen pb-12">
     <!-- Header -->
     <header class="bg-white shadow-md sticky top-0 z-50">
-        <div class="container mx-auto px-4 sm:px-6 py-4">
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 text-center">
-                <i class="fa-solid fa-paw text-blue-600"></i> ระบบแจ้งเตือน SMS โรงพยาบาลสัตว์
+        <div class="container mx-auto px-4 py-4">
+            <h1 class="text-2xl font-bold text-gray-800 text-center">
+                <i class="fa-solid fa-paw text-blue-600 mr-2"></i>ระบบแจ้งเตือน SMS
             </h1>
         </div>
     </header>
 
-    <main class="container mx-auto px-4 sm:px-6 py-8">
+    <main class="container mx-auto px-4 py-8 max-w-7xl">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
-            <!-- SMS Data Entry Form -->
-            <div class="card p-6 lg:p-8 h-fit">
-                <h2 id="form-title" class="text-2xl font-bold text-gray-800 mb-6 flex items-center transition-all">
+            <!-- FORM SECTION -->
+            <div class="card p-6 h-fit">
+                <h2 id="form-title" class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
                     <i class="fa-solid fa-file-pen mr-3 text-blue-600"></i>
                     <span>สร้างข้อความแจ้งเตือน</span>
                 </h2>
                 
-                <form id="smsForm" class="space-y-6">
-                    <input type="hidden" id="editRowNumber" name="editRowNumber">
-                    <!-- Form fields -->
-                    
-                    <!-- Phone Number First -->
+                <form id="smsForm" class="space-y-5">
+                    <!-- Phone -->
                     <div>
-                        <label for="phoneNumber" class="block text-sm font-semibold text-gray-700 mb-2">เบอร์ติดต่อ (10 หลัก)</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">เบอร์ติดต่อ (10 หลัก)</label>
                         <div class="input-with-icon relative">
                             <i class="fa-solid fa-mobile-screen-button input-icon"></i>
-                            <input type="tel" id="phoneNumber" name="phoneNumber" required maxlength="10" pattern="0[0-9]{9}" placeholder="0812345678" class="form-input" autocomplete="off">
-                            <!-- Container for Phone Suggestions -->
+                            <input type="tel" id="phoneNumber" name="phoneNumber" required maxlength="10" 
+                                   class="form-input" placeholder="0812345678" autocomplete="off">
                             <div id="phone-suggestions" class="suggestions-list"></div>
                         </div>
-                        <p id="phone-validation-message" class="validation-message">กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง</p>
+                        <p id="phone-error" class="validation-message">กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง</p>
                     </div>
 
-                    <!-- Pet Name Second -->
+                    <!-- Pet Name -->
                     <div>
-                        <label for="petName" class="block text-sm font-semibold text-gray-700 mb-2">ชื่อสัตว์เลี้ยง</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">ชื่อสัตว์เลี้ยง</label>
                         <div class="input-with-icon relative">
                             <i class="fa-solid fa-dog input-icon"></i>
-                            <input type="text" id="petName" name="petName" required placeholder="เช่น น้องนำโชค" class="form-input" autocomplete="off">
-                            <!-- Container for Pet Suggestions -->
+                            <input type="text" id="petName" name="petName" required 
+                                   class="form-input" placeholder="เช่น น้องนำโชค" autocomplete="off">
                             <div id="pet-suggestions" class="suggestions-list"></div>
                         </div>
                     </div>
 
+                    <!-- Appointment Type -->
                     <div>
-                        <label for="appointmentType" class="block text-sm font-semibold text-gray-700 mb-2">ประเภทนัดหมาย</label>
-                        <div class="input-with-icon"><i class="fa-solid fa-syringe input-icon"></i>
-                            <select id="appointmentType" name="appointmentType" required class="form-input appearance-none">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">ประเภทนัดหมาย</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-syringe input-icon"></i>
+                            <select id="appointmentType" name="appointmentType" required class="form-input appearance-none bg-white">
                                 <option value="" disabled selected>กรุณาเลือกประเภทนัด...</option>
-                                <option value="ฉีดวัคซีนรวมสุนัขและวัคซีนป้องกันโรคพิษสุนัขบ้า คำแนะนำ : งดอาบน้ำ 7 วัน">ฉีดวัคซีนรวมสุนัขและพิษสุนัขบ้า</option>
+                                <option value="ฉีดวัคซีนรวมสุนัขและวัคซีนป้องกันโรคพิษสุนัขบ้า คำแนะนำ : งดอาบน้ำ 7 วัน">ฉีดวัคซีนรวมสุนัข+พิษสุนัขบ้า</option>
                                 <option value="ฉีดวัคซีนรวมสุนัข คำแนะนำ : งดอาบน้ำ 7 วัน">ฉีดวัคซีนรวมสุนัข</option>
-                                <option value="ฉีดวัคซีนรวมแมวและวัคซีนป้องกันโรคพิษสุนัขบ้า คำแนะนำ : งดอาบน้ำ 7 วัน">ฉีดวัคซีนรวมแมวและพิษสุนัขบ้า</option>
+                                <option value="ฉีดวัคซีนรวมแมวและวัคซีนป้องกันโรคพิษสุนัขบ้า คำแนะนำ : งดอาบน้ำ 7 วัน">ฉีดวัคซีนรวมแมว+พิษสุนัขบ้า</option>
                                 <option value="ฉีดวัคซีนรวมแมว คำแนะนำ : งดอาบน้ำ 7 วัน">ฉีดวัคซีนรวมแมว</option>
-                                <option value="ฉีดวัคซีนป้องกันโรคพิษสุนัขบ้า คำแนะนำ : งดอาบน้ำ 7 วัน">ฉีดวัคซีนป้องกันโรคพิษสุนัขบ้า</option>
+                                <option value="ฉีดวัคซีนป้องกันโรคพิษสุนัขบ้า คำแนะนำ : งดอาบน้ำ 7 วัน">ฉีดวัคซีนพิษสุนัขบ้า</option>
                                 <option value="ฉีดวัคซีนลิวคีเมีย คำแนะนำ : งดอาบน้ำ 7 วัน">ฉีดวัคซีนลิวคีเมีย</option>
                                 <option value="ตรวจเลือดหาเชื้อไวรัสก่อนฉีดวัคซีนลิวคีเมีย คำแนะนำ : งดอาบน้ำ 7 วัน">ตรวจเลือดก่อนฉีดวัคซีนลิวคีเมีย</option>
                                 <option value="ฉีดวัคซีน คำแนะนำ : งดอาบน้ำ 7 วัน">ฉีดวัคซีน (ทั่วไป)</option>
@@ -163,757 +135,578 @@
                             </select>
                         </div>
                     </div>
+
+                    <!-- Date -->
                     <div>
-                        <label for="sendDate" class="block text-sm font-semibold text-gray-700 mb-2">วันที่ส่ง SMS</label>
-                         <div class="input-with-icon">
-                            <i class="fa-solid fa-calendar-days input-icon"></i>
-                            <input type="text" id="sendDate" name="sendDate" required class="form-input" placeholder="เลือกวันที่...">
-                         </div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">วันที่ส่ง SMS</label>
+                        <div class="flex gap-2">
+                             <div class="input-with-icon flex-grow">
+                                <i class="fa-solid fa-calendar-days input-icon"></i>
+                                <input type="text" id="sendDate" name="sendDate" required class="form-input" placeholder="เลือกวันที่...">
+                             </div>
+                             <button type="button" id="add1DayBtn" class="px-3 py-2 bg-blue-50 text-blue-600 rounded-lg border border-blue-200 hover:bg-blue-100 text-sm font-medium whitespace-nowrap transition">+1 วัน</button>
+                             <button type="button" id="add2DayBtn" class="px-3 py-2 bg-blue-50 text-blue-600 rounded-lg border border-blue-200 hover:bg-blue-100 text-sm font-medium whitespace-nowrap transition">+2 วัน</button>
+                        </div>
                     </div>
 
-                    <!-- Action Buttons -->
-                    <div id="form-actions" class="pt-4 grid grid-cols-2 gap-4">
-                        <button type="button" id="clearBtn" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center text-lg">
+                    <!-- Buttons -->
+                    <div class="pt-4 grid grid-cols-2 gap-4">
+                        <button type="button" id="clearBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-lg flex items-center justify-center transition">
                             <i class="fa-solid fa-eraser mr-2"></i><span id="clearBtn-text">ล้างข้อมูล</span>
                         </button>
-                        <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center text-lg">
+                        <button type="submit" id="submitBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transform hover:scale-105 transition flex items-center justify-center">
                             <i id="submitBtn-icon" class="fa-solid fa-paper-plane mr-2"></i><span id="submitBtn-text">บันทึก</span>
                         </button>
                     </div>
                 </form>
             </div>
 
-            <!-- Dashboard Section -->
-            <div class="card p-6 lg:p-8 h-fit">
+            <!-- DASHBOARD SECTION -->
+            <div class="card p-6 h-fit">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                     <h2 class="text-2xl font-bold text-gray-800 flex items-center">
                         <i class="fa-solid fa-clock-rotate-left mr-3 text-blue-600"></i>
                         รายการข้อมูล
                     </h2>
                     
-                    <div class="flex items-center self-end sm:self-auto">
-                        <span id="result-count" class="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full mr-2 hidden">0 รายการ</span>
-                        <span id="last-updated" class="last-updated hidden sm:inline"></span>
-                        <!-- Refresh Button -->
-                        <button onclick="loadDashboard()" class="text-gray-400 hover:text-blue-600 transition p-2 rounded-full hover:bg-gray-100" title="รีเฟรชข้อมูล">
+                    <div class="flex items-center self-end sm:self-auto space-x-2">
+                        <span id="result-count" class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full hidden">0</span>
+                        <span id="last-updated" class="text-xs text-gray-400 hidden sm:inline"></span>
+                        <button id="refreshBtn" class="text-gray-400 hover:text-blue-600 p-2 rounded-full hover:bg-gray-50 transition" title="รีเฟรชข้อมูล">
                             <i class="fa-solid fa-rotate-right"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- Quick Filters -->
-                <div class="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
-                    <button onclick="setFilter('all')" id="filter-all" class="filter-btn active px-4 py-2 rounded-full bg-white text-gray-600 border border-gray-200 font-medium text-sm whitespace-nowrap transition-colors hover:bg-gray-50">ทั้งหมด</button>
-                    <button onclick="setFilter('today')" id="filter-today" class="filter-btn px-4 py-2 rounded-full bg-white text-gray-600 border border-gray-200 font-medium text-sm whitespace-nowrap transition-colors hover:bg-gray-50"><i class="fa-solid fa-calendar-day mr-1 text-yellow-500"></i> นัดวันนี้</button>
-                    <button onclick="setFilter('tomorrow')" id="filter-tomorrow" class="filter-btn px-4 py-2 rounded-full bg-white text-gray-600 border border-gray-200 font-medium text-sm whitespace-nowrap transition-colors hover:bg-gray-50"><i class="fa-solid fa-calendar-plus mr-1 text-green-500"></i> นัดพรุ่งนี้</button>
+                <!-- Filters -->
+                <div class="flex gap-2 mb-4 overflow-x-auto pb-2 no-scrollbar">
+                    <button data-filter="all" class="filter-btn active px-4 py-2 rounded-full bg-white text-gray-600 border border-gray-200 text-sm font-medium whitespace-nowrap">ทั้งหมด</button>
+                    <button data-filter="today" class="filter-btn px-4 py-2 rounded-full bg-white text-gray-600 border border-gray-200 text-sm font-medium whitespace-nowrap"><i class="fa-solid fa-calendar-day mr-1 text-yellow-500"></i> นัดวันนี้</button>
+                    <button data-filter="tomorrow" class="filter-btn px-4 py-2 rounded-full bg-white text-gray-600 border border-gray-200 text-sm font-medium whitespace-nowrap"><i class="fa-solid fa-calendar-plus mr-1 text-green-500"></i> นัดพรุ่งนี้</button>
                 </div>
 
-                <!-- Search Bar -->
+                <!-- Search -->
                 <div class="mb-6 relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
-                    </div>
-                    <input type="text" id="searchInput" 
-                           class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 sm:text-sm transition duration-150 ease-in-out" 
-                           placeholder="ค้นหาด้วยชื่อสัตว์เลี้ยง หรือ เบอร์โทรศัพท์...">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-400"></i>
+                    <input type="text" id="searchInput" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm" placeholder="ค้นหาชื่อ หรือ เบอร์โทร...">
                 </div>
                 
-                <div id="dashboard" class="space-y-4 min-h-[200px]">
-                    <!-- Initial Loading State (Skeleton) -->
-                    <div class="space-y-3">
-                         <div class="border border-gray-200 rounded-xl p-4">
-                            <div class="flex justify-between mb-2"><div class="skeleton h-6 w-1/3"></div><div class="skeleton h-6 w-8"></div></div>
-                            <div class="skeleton h-4 w-2/3 mb-2"></div>
-                            <div class="flex gap-4"><div class="skeleton h-4 w-1/4"></div><div class="skeleton h-4 w-1/4"></div></div>
-                         </div>
-                    </div>
-                </div>
+                <!-- List -->
+                <div id="dashboard" class="space-y-4 min-h-[200px]"></div>
             </div>
         </div>
     </main>
     
-    <!-- Flatpickr JS & Thai Locale -->
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/th.js"></script>
 
     <script>
-        // --- CONFIGURATION ---
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwtzEUk2yuCCoxrd53YRXfgN9cP6rtr3ixeLr9iD7aRNjuvx9TMk76Rq50hPpvYuyV/exec"; 
-        const GVIZ_URL = "https://docs.google.com/spreadsheets/d/1UltCx_5u19F675ELpi7OUAxQJFh6UkbD6Qq__jQoL5Q/gviz/tq?tqx=out:json&sheet=DATA";
-
-        // --- DOM ELEMENTS ---
-        const form = document.getElementById('smsForm');
-        const dashboard = document.getElementById('dashboard');
-        const submitBtn = document.getElementById('submitBtn');
-        const requiredInputs = form.querySelectorAll('[required]');
-        const searchInput = document.getElementById('searchInput');
-        const phoneInput = document.getElementById('phoneNumber');
-        const petInput = document.getElementById('petName');
-        const phoneList = document.getElementById('phone-suggestions');
-        const petList = document.getElementById('pet-suggestions');
-        const lastUpdatedEl = document.getElementById('last-updated');
-        const resultCountEl = document.getElementById('result-count');
-        
-        // --- TOAST NOTIFICATION CONFIG ---
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer)
-                toast.addEventListener('mouseleave', Swal.resumeTimer)
-            }
-        });
-
-        // --- INITIALIZE FLATPICKR ---
-        const datePicker = flatpickr("#sendDate", {
-            locale: "th",
-            altInput: true,
-            altFormat: "d F Y",
-            dateFormat: "Y-m-d",
-            defaultDate: new Date(),
-            disableMobile: true
-        });
-
-        // --- APP STATE ---
-        const appState = {
-            isEditing: false,
-            editingRowNumber: null,
-            allRows: [], 
-            currentFilter: 'all',
-            copiedRows: new Set() // Track copied items per session
+        /**
+         * CONFIGURATION & CONSTANTS
+         */
+        const CONFIG = {
+            SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwwtzEUk2yuCCoxrd53YRXfgN9cP6rtr3ixeLr9iD7aRNjuvx9TMk76Rq50hPpvYuyV/exec",
+            GVIZ_URL: "https://docs.google.com/spreadsheets/d/1UltCx_5u19F675ELpi7OUAxQJFh6UkbD6Qq__jQoL5Q/gviz/tq?tqx=out:json&sheet=SMS"
         };
 
-        // --- HELPER FUNCTIONS ---
-        function convertToBuddhistEra(gregorianDate) {
-            if (!gregorianDate) return '';
-            const date = new Date(gregorianDate);
-            const buddhistYear = date.getFullYear() + 543;
-            const day = date.getDate().toString().padStart(2, '0');
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            return `${day}/${month}/${buddhistYear}`;
-        }
+        const DOM = {
+            form: document.getElementById('smsForm'),
+            dashboard: document.getElementById('dashboard'),
+            submitBtn: document.getElementById('submitBtn'),
+            clearBtn: document.getElementById('clearBtn'),
+            refreshBtn: document.getElementById('refreshBtn'),
+            searchInput: document.getElementById('searchInput'),
+            phoneInput: document.getElementById('phoneNumber'),
+            petInput: document.getElementById('petName'),
+            sendDateInput: document.getElementById('sendDate'),
+            resultCount: document.getElementById('result-count'),
+            lastUpdated: document.getElementById('last-updated'),
+            phoneError: document.getElementById('phone-error'),
+            add1DayBtn: document.getElementById('add1DayBtn'),
+            add2DayBtn: document.getElementById('add2DayBtn'),
+            suggestions: {
+                phone: document.getElementById('phone-suggestions'),
+                pet: document.getElementById('pet-suggestions')
+            },
+            formTitle: {
+                container: document.getElementById('form-title'),
+                text: document.querySelector('#form-title span'),
+                icon: document.querySelector('#form-title i')
+            },
+            submitBtnElements: {
+                text: document.getElementById('submitBtn-text'),
+                icon: document.getElementById('submitBtn-icon')
+            },
+            clearBtnText: document.getElementById('clearBtn-text'),
+            filters: document.querySelectorAll('.filter-btn')
+        };
 
-        function convertBuddhistToGregorian(buddhistDate) {
-            if (!buddhistDate || !buddhistDate.includes('/')) return null;
-            const parts = buddhistDate.split('/');
-            const gregorianYear = parseInt(parts[2], 10) - 543;
-            if (isNaN(gregorianYear)) return null;
-            return new Date(gregorianYear, parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
-        }
-        
-        function getStatus(appointmentDate) {
-            if (!appointmentDate) return 'past';
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            appointmentDate.setHours(0, 0, 0, 0);
-
-            if (appointmentDate.getTime() > today.getTime()) return 'future';
-            if (appointmentDate.getTime() === today.getTime()) return 'today';
-            return 'past';
-        }
-
-        function copyToClipboard(text, btnElement, rowNumber) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.style.position = 'fixed'; 
-            textarea.style.left = '-9999px';
-            document.body.appendChild(textarea);
-            textarea.select();
-            
-            try {
-                document.execCommand('copy');
-                Toast.fire({ icon: 'success', title: 'คัดลอกข้อความแล้ว' });
-                
-                // Visual feedback
-                appState.copiedRows.add(rowNumber);
-                if (btnElement) {
-                    btnElement.classList.add('copied');
-                    btnElement.innerHTML = '<i class="fa-solid fa-check"></i>';
-                    btnElement.title = "คัดลอกแล้ว";
-                }
-
-            } catch (err) {
-                Swal.fire({ icon: 'error', title: 'คัดลอกไม่สำเร็จ', text: 'เบราว์เซอร์ของคุณอาจไม่รองรับ' });
-            }
-            document.body.removeChild(textarea);
-        }
-
-        function generateSMSMessage(petName, appointmentType) {
-            const apptName = appointmentType.split(' คำแนะนำ')[0];
-            return `แจ้งเตือนนัดหมายน้อง ${petName} วันพรุ่งนี้\nนัด : ${apptName}\nหากต้องการเลื่อนนัด/สอบถาม โทร 0634461952 หรือ LINE: @SRNANIMALCARE\nโรงพยาบาลสัตว์สุราษฎร์ธานี (ใน บขส.ใหม่)`;
-        }
-
-        // --- FILTER FUNCTIONS ---
-        function setFilter(filterType) {
-            appState.currentFilter = filterType;
-            
-            // Update UI buttons
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-                btn.classList.remove('bg-blue-50', 'text-blue-600', 'border-blue-200');
-                btn.classList.add('bg-white', 'text-gray-600', 'border-gray-200');
-            });
-            
-            const activeBtn = document.getElementById(`filter-${filterType}`);
-            if (activeBtn) {
-                activeBtn.classList.add('active');
-                activeBtn.classList.remove('bg-white', 'text-gray-600', 'border-gray-200');
-                activeBtn.classList.add('bg-blue-50', 'text-blue-600', 'border-blue-200');
-            }
-            
-            applyFiltersAndRender();
-        }
-
-        function applyFiltersAndRender() {
-            let filteredRows = appState.allRows;
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            
-            // 1. Apply Date Filter
-            if (appState.currentFilter === 'today') {
-                filteredRows = filteredRows.filter(row => {
-                    const date = convertBuddhistToGregorian(row.formattedDate);
-                    return date && date.getTime() === today.getTime();
-                });
-            } else if (appState.currentFilter === 'tomorrow') {
-                const tomorrow = new Date(today);
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                filteredRows = filteredRows.filter(row => {
-                    const date = convertBuddhistToGregorian(row.formattedDate);
-                    return date && date.getTime() === tomorrow.getTime();
-                });
-            }
-
-            // 2. Apply Search Filter
-            const searchTerm = searchInput.value.trim().toLowerCase();
-            if (searchTerm) {
-                filteredRows = filteredRows.filter(row => {
-                    return row.petName.toLowerCase().includes(searchTerm) || 
-                           row.phone.includes(searchTerm);
-                });
-            }
-
-            renderDashboard(filteredRows);
-        }
-
-        // --- UI UPDATE FUNCTIONS ---
-        function updateFormUI() {
-            const titleIcon = document.querySelector('#form-title i');
-            const titleText = document.querySelector('#form-title span');
-            const clearBtnText = document.getElementById('clearBtn-text');
-            const submitBtnText = document.getElementById('submitBtn-text');
-            const submitBtnIcon = document.getElementById('submitBtn-icon');
-
-            if (appState.isEditing) {
-                titleIcon.className = 'fa-solid fa-pencil mr-3 text-amber-500';
-                titleText.textContent = 'แก้ไขข้อมูล';
-                submitBtnText.textContent = 'อัปเดตข้อมูล';
-                submitBtnIcon.className = 'fa-solid fa-floppy-disk mr-2';
-                submitBtn.classList.replace('bg-blue-600', 'bg-amber-500');
-                submitBtn.classList.replace('hover:bg-blue-700', 'hover:bg-amber-600');
-                clearBtnText.textContent = 'ยกเลิกแก้ไข';
-            } else {
-                titleIcon.className = 'fa-solid fa-file-pen mr-3 text-blue-600';
-                titleText.textContent = 'สร้างข้อความแจ้งเตือน';
-                submitBtnText.textContent = 'บันทึก';
-                submitBtnIcon.className = 'fa-solid fa-paper-plane mr-2';
-                submitBtn.classList.replace('bg-amber-500', 'bg-blue-600');
-                submitBtn.classList.replace('hover:bg-amber-600', 'hover:bg-blue-700');
-                clearBtnText.textContent = 'ล้างข้อมูล';
-            }
-            validateForm();
-        }
-
-        function renderDashboard(rows) {
-            // Update counter
-            if (rows.length > 0) {
-                resultCountEl.textContent = `${rows.length} รายการ`;
-                resultCountEl.classList.remove('hidden');
-            } else {
-                resultCountEl.classList.add('hidden');
-            }
-
-            if (!rows || rows.length === 0) {
-                dashboard.innerHTML = `
-                    <div class="text-center py-8 flex flex-col items-center justify-center opacity-70">
-                        <i class="fa-solid fa-folder-open text-5xl text-gray-300 mb-3"></i>
-                        <p class="text-gray-500">ไม่พบข้อมูลตามเงื่อนไข</p>
-                    </div>`;
-                return;
-            }
-            
-            let rowsToDisplay = rows;
-            const isFiltering = appState.currentFilter !== 'all' || searchInput.value.trim().length > 0;
-            
-            if (!isFiltering) {
-                rowsToDisplay = rows.slice(0, 3);
-            }
-
-            dashboard.innerHTML = '<div class="space-y-3">' + rowsToDisplay.map((row) => {
-                const { rowNumber, date, phone, petName, appointmentType, formattedDate, smsMessage } = row;
-                const appointmentDate = convertBuddhistToGregorian(formattedDate);
-                const status = getStatus(appointmentDate);
-                const statusColors = { future: 'bg-green-500', today: 'bg-yellow-500', past: 'bg-gray-400' };
-                
-                const messageToCopy = smsMessage || generateSMSMessage(petName, appointmentType);
-                const safeMessage = encodeURIComponent(messageToCopy);
-                
-                const isCopied = appState.copiedRows.has(rowNumber);
-                const copyBtnClass = isCopied ? 'copy-btn action-btn copied' : 'copy-btn action-btn';
-                const copyBtnIcon = isCopied ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-regular fa-copy"></i>';
-                const copyBtnTitle = isCopied ? 'คัดลอกแล้ว' : 'คัดลอกข้อความ SMS';
-
-                return `
-                    <div class="dashboard-item relative border border-gray-200 rounded-xl p-4 transition-all hover:shadow-lg hover:border-blue-500 hover:-translate-y-1 bg-white"
-                         data-row-number="${rowNumber}" data-pet-name="${petName}" data-phone="${phone}"
-                         data-appointment-type="${appointmentType}" data-send-date="${formattedDate}"
-                         data-message="${safeMessage}">
-                        <span class="absolute top-3 right-3 h-3 w-3 rounded-full ${statusColors[status]} ring-2 ring-white" title="สถานะ: ${status}"></span>
-                        <div class="flex justify-between items-start">
-                            <p class="font-bold text-lg text-gray-800 pr-10">${petName}</p>
-                            <div class="flex items-center space-x-1">
-                                <button class="${copyBtnClass}" title="${copyBtnTitle}">${copyBtnIcon}</button>
-                                <div class="w-px h-4 bg-gray-300 mx-1"></div>
-                                <button class="edit-btn action-btn text-gray-500 hover:text-blue-600" aria-label="Edit"><i class="fa-solid fa-pencil"></i></button>
-                                <button class="delete-btn action-btn text-gray-500 hover:text-red-600" aria-label="Delete"><i class="fa-solid fa-trash"></i></button>
-                            </div>
-                        </div>
-                        <p class="text-sm text-gray-600 mt-2"><i class="fa-solid fa-syringe w-4 mr-1 text-gray-400"></i> ${appointmentType.split(' คำแนะนำ')[0]}</p>
-                        <div class="flex text-sm text-gray-600 mt-1">
-                            <p class="mr-4"><i class="fa-solid fa-mobile-screen-button w-4 mr-1 text-gray-400"></i> ${phone}</p>
-                            <p><i class="fa-solid fa-calendar-days w-4 mr-1 text-gray-400"></i> ${formattedDate}</p>
-                        </div>
-                    </div>
-                `;
-            }).join('') + '</div>';
-        }
-        
-        function showSkeletonLoading() {
-             dashboard.innerHTML = `
-                <div class="space-y-3">
-                     <div class="border border-gray-200 rounded-xl p-4 animate-pulse">
-                        <div class="flex justify-between mb-2"><div class="bg-gray-200 h-6 w-1/3 rounded"></div><div class="bg-gray-200 h-6 w-8 rounded"></div></div>
-                        <div class="bg-gray-200 h-4 w-2/3 mb-2 rounded"></div>
-                        <div class="flex gap-4"><div class="bg-gray-200 h-4 w-1/4 rounded"></div><div class="bg-gray-200 h-4 w-1/4 rounded"></div></div>
-                     </div>
-                </div>`;
-        }
-
-        // --- FORM VALIDATION ---
-        function validateForm() {
-            let isFormValid = true;
-            requiredInputs.forEach(input => {
-                if (!input.value.trim()) {
-                    isFormValid = false;
-                }
-            });
-
-            const phoneValidationMessage = document.getElementById('phone-validation-message');
-            const phoneValue = phoneInput.value;
-            const phoneRegex = /^0\d{9}$/;
-
-            if (phoneValue.length > 0) {
-                if (!phoneRegex.test(phoneValue)) {
-                    isFormValid = false;
-                    phoneInput.classList.add('invalid');
-                    phoneValidationMessage.style.display = 'block';
-
-                    if (!phoneValue.startsWith('0')) {
-                        phoneValidationMessage.textContent = 'เบอร์โทรศัพท์ต้องขึ้นต้นด้วย 0';
-                    } else if (phoneValue.length < 10) {
-                        phoneValidationMessage.textContent = 'กรุณากรอกเบอร์โทรศัพท์ให้ครบ 10 หลัก';
-                    } else {
-                         phoneValidationMessage.textContent = 'รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง';
-                    }
-                } else {
-                    phoneInput.classList.remove('invalid');
-                    phoneValidationMessage.style.display = 'none';
-                }
-            } else {
-                phoneInput.classList.remove('invalid');
-                phoneValidationMessage.style.display = 'none';
-            }
-
-            submitBtn.disabled = !isFormValid;
-        }
-
-        // --- AUTOCOMPLETE LOGIC ---
-        function setupAutocomplete() {
-            // Close when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.input-with-icon')) {
-                    phoneList.style.display = 'none';
-                    petList.style.display = 'none';
-                }
-            });
-
-            // Phone Input Listener
-            phoneInput.addEventListener('input', function(e) {
-                // Also handle validation logic here to ensure order
-                this.value = this.value.replace(/[^0-9]/g, '');
-                validateForm();
-
-                const value = this.value.trim();
-                if (value.length < 3) {
-                    phoneList.style.display = 'none';
-                    return;
-                }
-                
-                const matches = [];
-                const seen = new Set();
-
-                // Check appState.allRows for history
-                appState.allRows.forEach(row => {
-                    if (row.phone.includes(value)) {
-                        const key = `${row.phone}|${row.petName}`;
-                        if (!seen.has(key)) {
-                            seen.add(key);
-                            matches.push(row);
-                        }
-                    }
-                });
-
-                renderSuggestions(phoneList, matches.slice(0, 5), 'phone');
-            });
-
-            // Pet Input Listener
-            petInput.addEventListener('input', function() {
-                validateForm();
-                const value = this.value.trim().toLowerCase();
-                if (value.length < 2) {
-                    petList.style.display = 'none';
-                    return;
-                }
-                
-                const matches = [];
-                const seen = new Set();
-
-                appState.allRows.forEach(row => {
-                    if (row.petName.toLowerCase().includes(value)) {
-                        const key = `${row.phone}|${row.petName}`;
-                        if (!seen.has(key)) {
-                            seen.add(key);
-                            matches.push(row);
-                        }
-                    }
-                });
-
-                renderSuggestions(petList, matches.slice(0, 5), 'pet');
-            });
-        }
-
-        function renderSuggestions(container, items, type) {
-            if (items.length === 0) {
-                container.style.display = 'none';
-                return;
-            }
-
-            container.innerHTML = items.map(item => {
-                const mainText = type === 'phone' ? item.phone : item.petName;
-                const subText = type === 'phone' ? item.petName : item.phone;
-                // Escape simple quotes for onclick
-                const safePet = item.petName.replace(/'/g, "\\'");
-                const safePhone = item.phone;
-                
-                return `
-                    <div class="suggestion-item" onclick="fillForm('${safePet}', '${safePhone}')">
-                        <div class="suggestion-main">${mainText}</div>
-                        <div class="suggestion-sub">
-                            <i class="${type === 'phone' ? 'fa-solid fa-dog' : 'fa-solid fa-mobile-screen-button'} mr-2 text-gray-400"></i> 
-                            ${subText}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            container.style.display = 'block';
-        }
-
-        // Global function for onclick (attached to window to be accessible)
-        window.fillForm = function(pet, phone) {
-            petInput.value = pet;
-            phoneInput.value = phone;
-            
-            phoneList.style.display = 'none';
-            petList.style.display = 'none';
-            
-            validateForm(); // Re-validate after filling
-        }
-
-        // --- DATA FETCHING & ACTIONS ---
-        async function loadDashboard() {
-            showSkeletonLoading();
-            try {
-                // Random parameter to force cache bypass
-                const randomParam = Math.floor(Math.random() * 999999);
-                const response = await fetch(`${GVIZ_URL}&t=${new Date().getTime()}&_=${randomParam}`, {
-                    headers: {
-                        'Pragma': 'no-cache',
-                        'Cache-Control': 'no-cache'
-                    }
-                });
-                
-                if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
-                const text = await response.text();
-                
-                const startIndex = text.indexOf('(');
-                const endIndex = text.lastIndexOf(')');
-
-                if (startIndex === -1 || endIndex === -1) {
-                    throw new Error("Could not parse the data from Google Sheets.");
-                }
-
-                const jsonString = text.substring(startIndex + 1, endIndex);
-                const jsonData = JSON.parse(jsonString);
-                
-                const now = new Date();
-                const timeString = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-                lastUpdatedEl.textContent = `อัปเดต: ${timeString}`;
-
-                if (!jsonData.table || !jsonData.table.rows) {
-                    appState.allRows = [];
-                    applyFiltersAndRender(); // Render with empty state
-                    return;
-                }
-                
-                appState.allRows = jsonData.table.rows.map((row, index) => {
-                    return {
-                        rowNumber: index + 2,
-                        formattedDate: row.c[0]?.f || 'N/A',
-                        phone: (row.c[1]?.v || 'N/A').replace(/'/g, ''),
-                        petName: row.c[2]?.v || 'N/A',
-                        appointmentType: row.c[3]?.v || 'N/A',
-                        smsMessage: row.c[5]?.v || '' 
-                    };
-                }).reverse();
-
-                applyFiltersAndRender();
-            } catch (error) {
-                console.error('Error loading dashboard:', error);
-                // If parsing fails (empty sheet), clear dashboard
-                appState.allRows = [];
-                applyFiltersAndRender();
-            }
-        }
-        
-        searchInput.addEventListener('input', (e) => {
-            applyFiltersAndRender();
+        const Toast = Swal.mixin({
+            toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true,
+            didOpen: (toast) => { toast.onmouseenter = Swal.stopTimer; toast.onmouseleave = Swal.resumeTimer; }
         });
 
-        function enterEditMode(item) {
-            appState.isEditing = true;
-            appState.editingRowNumber = item.dataset.rowNumber;
+        // Initialize DatePicker
+        const datePicker = flatpickr("#sendDate", {
+            locale: "th", altInput: true, altFormat: "d F Y", dateFormat: "Y-m-d",
+            defaultDate: new Date(), disableMobile: true,
+            onChange: () => Validation.check()
+        });
+
+        /**
+         * STATE MANAGEMENT
+         */
+        const state = {
+            isEditing: false,
+            editingRowNumber: null,
+            allRows: [],
+            currentFilter: 'all',
+            copiedRows: new Set()
+        };
+
+        /**
+         * UTILITY FUNCTIONS
+         */
+        const Utils = {
+            toBuddhistEra: (dateStr) => {
+                if (!dateStr) return '';
+                const date = new Date(dateStr);
+                return `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear() + 543}`;
+            },
             
-            form.elements.petName.value = item.dataset.petName;
-            form.elements.phoneNumber.value = item.dataset.phone;
-            form.elements.appointmentType.value = item.dataset.appointmentType;
-            
-            const gregorianDate = convertBuddhistToGregorian(item.dataset.sendDate);
-            if (gregorianDate) {
-                datePicker.setDate(gregorianDate);
+            toGregorian: (buddhistDateStr) => {
+                if (!buddhistDateStr || !buddhistDateStr.includes('/')) return null;
+                const [d, m, y] = buddhistDateStr.split('/');
+                return new Date(parseInt(y) - 543, parseInt(m) - 1, parseInt(d));
+            },
+
+            getStatus: (dateObj) => {
+                if (!dateObj) return 'past';
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                dateObj.setHours(0, 0, 0, 0);
+                if (dateObj > today) return 'future';
+                if (dateObj.getTime() === today.getTime()) return 'today';
+                return 'past';
+            },
+
+            generateMessage: (pet, type, date) => {
+                const appt = type.split(' คำแนะนำ')[0];
+                return `แจ้งเตือนนัดหมายน้อง ${pet} วันพรุ่งนี้ (${date})\nนัด : ${appt}\nหากต้องการเลื่อนนัด/สอบถาม โทร 0634461952 หรือ LINE: @SRNANIMALCARE\nโรงพยาบาลสัตว์สุราษฎร์ธานี (ใน บขส.ใหม่)`;
+            },
+
+            copyText: (text, btn, rowNum) => {
+                const area = document.createElement('textarea');
+                area.value = text;
+                area.style.position = 'fixed'; area.style.left = '-9999px';
+                document.body.appendChild(area);
+                area.select();
+                try {
+                    document.execCommand('copy');
+                    Toast.fire({ icon: 'success', title: 'คัดลอกข้อความแล้ว' });
+                    state.copiedRows.add(rowNum);
+                    if(btn) {
+                        btn.classList.add('copied');
+                        btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+                    }
+                } catch(e) {
+                    Swal.fire('Error', 'คัดลอกไม่สำเร็จ', 'error');
+                }
+                document.body.removeChild(area);
             }
+        };
 
-            updateFormUI();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function exitEditMode() {
-            appState.isEditing = false;
-            appState.editingRowNumber = null;
-            form.reset();
-            datePicker.setDate(new Date());
-            updateFormUI();
-        }
-
-        function handleDelete(rowNumber) {
-            rowNumber = parseInt(rowNumber);
-            Swal.fire({
-                title: 'คุณแน่ใจหรือไม่?', text: "คุณต้องการลบข้อมูลนี้ใช่ไหม", icon: 'warning',
-                showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6',
-                confirmButtonText: 'ใช่, ลบเลย!', cancelButtonText: 'ยกเลิก'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Pass the rowNumber and action to callAppsScript
-                    callAppsScript({ action: 'delete', rowNumber: rowNumber }, 'กำลังลบข้อมูล...', () => {
-                        // Success callback: Optimistically remove from UI
-                        removeFromLocalState(rowNumber);
-                        Toast.fire({ icon: 'success', title: 'ลบข้อมูลเรียบร้อยแล้ว' });
-                    }, () => {
-                        // Error callback: Force removal anyway because data is likely out of sync
-                         Swal.fire({
-                            icon: 'warning',
-                            title: 'ข้อมูลอาจไม่ตรงกัน',
-                            text: 'ระบบจะรีเฟรชข้อมูลเพื่อความถูกต้อง',
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                        removeFromLocalState(rowNumber);
-                        // Trigger reload after a short delay
-                        setTimeout(loadDashboard, 1000);
+        /**
+         * API SERVICE
+         */
+        const API = {
+            fetchData: async () => {
+                UI.showSkeleton();
+                try {
+                    const rnd = Math.floor(Math.random() * 999999);
+                    const res = await fetch(`${CONFIG.GVIZ_URL}&t=${new Date().getTime()}&_=${rnd}`, {
+                        headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' }
                     });
-                }
-            });
-        }
-        
-        function removeFromLocalState(rowNumber) {
-             // Optimistic UI Update: Remove from local state immediately
-            appState.allRows = appState.allRows.filter(r => r.rowNumber !== rowNumber);
-            
-            // Shift row numbers for items below the deleted one to keep consistency
-            appState.allRows.forEach(row => {
-                if (row.rowNumber > rowNumber) {
-                    row.rowNumber--;
-                }
-            });
-
-            applyFiltersAndRender();
-        }
-
-        // Updated callAppsScript to accept onSuccess AND onError callbacks
-        function callAppsScript(data, loadingText, onSuccess, onError) {
-            // Show loading
-            Swal.fire({ title: loadingText, text: 'กรุณารอสักครู่...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-            const callbackName = 'jsonp_callback_' + Date.now();
-            const script = document.createElement('script');
-            
-            window[callbackName] = function(response) {
-                document.head.removeChild(script);
-                delete window[callbackName];
-                
-                // Close loading modal
-                Swal.close();
-
-                if (response.result === 'success') {
+                    if (!res.ok) throw new Error(res.statusText);
                     
-                    if (data.action === 'delete' && onSuccess) {
-                        onSuccess();
+                    const text = await res.text();
+                    // Extract JSON from GVIZ response
+                    const jsonStr = text.substring(text.indexOf('(') + 1, text.lastIndexOf(')'));
+                    const json = JSON.parse(jsonStr);
+
+                    // Update Timestamp
+                    DOM.lastUpdated.textContent = `อัปเดต: ${new Date().toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})}`;
+
+                    if (!json.table || !json.table.rows) {
+                        state.allRows = [];
                     } else {
-                        // For create/update: Success Toast
-                        Toast.fire({ 
-                            icon: 'success', 
-                            title: data.action === 'update' ? 'อัปเดตข้อมูลเรียบร้อยแล้ว' : 'บันทึกข้อมูลเรียบร้อยแล้ว' 
-                        });
-                        
-                        // Standard reload/reset
-                        exitEditMode();
-                        loadDashboard();
+                        state.allRows = json.table.rows.map((r, i) => ({
+                            rowNumber: i + 2,
+                            formattedDate: r.c[0]?.f || 'N/A',
+                            phone: (r.c[1]?.v || 'N/A').replace(/'/g, ''),
+                            petName: r.c[2]?.v || 'N/A',
+                            appointmentType: r.c[3]?.v || 'N/A',
+                            smsMessage: r.c[5]?.v || ''
+                        })).reverse();
                     }
-                } else {
-                    if (onError) onError(); 
-                    else handleError(new Error(response.error || 'Unknown error from server.'));
+                    UI.renderDashboard();
+                } catch (err) {
+                    console.error(err);
+                    DOM.dashboard.innerHTML = `<div class="text-center py-8 text-red-500"><i class="fa-solid fa-circle-exclamation text-2xl mb-2"></i><p>โหลดข้อมูลไม่สำเร็จ กรุณารีเฟรช</p></div>`;
                 }
-            };
+            },
 
-            const params = new URLSearchParams({ callback: callbackName, ...data });
-            script.src = `${SCRIPT_URL}?${params.toString()}`;
-            script.onerror = () => {
-                 if (onError) onError();
-                 else handleError(new Error('Network error: Failed to load the script.'));
-            };
-            document.head.appendChild(script);
-            
-            setTimeout(() => {
-                if (window[callbackName]) {
-                    document.head.removeChild(script);
-                    delete window[callbackName];
-                    if (onError) onError();
-                    else handleError(new Error('Request timed out. The server did not respond.'));
-                }
-            }, 15000);
-        }
+            submitData: (data, loadingText, onSuccess, onError) => {
+                Swal.fire({ title: loadingText, allowOutsideClick: false, didOpen: Swal.showLoading });
+                
+                const cb = 'jsonp_' + Date.now();
+                const script = document.createElement('script');
+                window[cb] = (res) => {
+                    script.remove(); delete window[cb]; Swal.close();
+                    if (res.result === 'success') onSuccess();
+                    else onError ? onError() : Swal.fire('Error', res.error, 'error');
+                };
 
-        function handleError(error) {
-            console.error('Operation failed:', error);
-            Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด!', text: error.message });
-        }
-
-        // --- EVENT LISTENERS ---
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const action = appState.isEditing ? 'update' : 'create';
-            const loadingText = appState.isEditing ? 'กำลังอัปเดต...' : 'กำลังบันทึก...';
-            
-            if (!appState.isEditing) {
-                const petNameInput = form.elements.petName.value.trim();
-                const sendDateInput = form.elements.sendDate.value;
-                const formattedSendDate = convertToBuddhistEra(sendDateInput);
-
-                const duplicate = appState.allRows.find(row => 
-                    row.petName.trim() === petNameInput && 
-                    row.formattedDate === formattedSendDate
-                );
-
-                if (duplicate) {
-                    Swal.fire({
-                        title: 'พบข้อมูลซ้ำ!',
-                        text: `มีข้อมูลของน้อง "${petNameInput}" ในวันที่ ${formattedSendDate} แล้ว ต้องการบันทึกซ้ำหรือไม่?`,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'ยืนยันบันทึกซ้ำ',
-                        cancelButtonText: 'ยกเลิก'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                             const data = {
-                                action: action,
-                                sendDate: formattedSendDate,
-                                phoneNumber: form.elements.phoneNumber.value,
-                                petName: form.elements.petName.value,
-                                appointmentType: form.elements.appointmentType.value,
-                                rowNumber: appState.editingRowNumber
-                            };
-                            callAppsScript(data, loadingText);
-                        }
-                    });
-                    return; 
-                }
+                const params = new URLSearchParams({ callback: cb, ...data });
+                script.src = `${CONFIG.SCRIPT_URL}?${params}`;
+                script.onerror = () => { Swal.fire('Error', 'Network Error', 'error'); if(onError) onError(); };
+                document.body.appendChild(script);
             }
-            
-            const data = {
-                action: action,
-                sendDate: convertToBuddhistEra(form.elements.sendDate.value),
-                phoneNumber: form.elements.phoneNumber.value,
-                petName: form.elements.petName.value,
-                appointmentType: form.elements.appointmentType.value,
-                rowNumber: appState.editingRowNumber
-            };
-            callAppsScript(data, loadingText);
+        };
+
+        /**
+         * UI RENDERERS
+         */
+        const UI = {
+            showSkeleton: () => {
+                DOM.dashboard.innerHTML = Array(2).fill(`<div class="border rounded-xl p-4 animate-pulse bg-white"><div class="h-6 bg-gray-200 rounded w-1/3 mb-2"></div><div class="h-4 bg-gray-200 rounded w-2/3"></div></div>`).join('');
+            },
+
+            renderDashboard: () => {
+                let rows = state.allRows;
+                const today = new Date(); today.setHours(0,0,0,0);
+
+                // 1. Filter by Category
+                if (state.currentFilter === 'today') {
+                    rows = rows.filter(r => {
+                        const d = Utils.toGregorian(r.formattedDate);
+                        return d && d.getTime() === today.getTime();
+                    });
+                } else if (state.currentFilter === 'tomorrow') {
+                    const tmr = new Date(today); tmr.setDate(tmr.getDate() + 1);
+                    rows = rows.filter(r => {
+                        const d = Utils.toGregorian(r.formattedDate);
+                        return d && d.getTime() === tmr.getTime();
+                    });
+                }
+
+                // 2. Filter by Search
+                const term = DOM.searchInput.value.trim().toLowerCase();
+                if (term) {
+                    rows = rows.filter(r => r.petName.toLowerCase().includes(term) || r.phone.includes(term));
+                }
+
+                // Counter
+                DOM.resultCount.textContent = `${rows.length} รายการ`;
+                DOM.resultCount.classList.remove('hidden');
+
+                if (rows.length === 0) {
+                    DOM.dashboard.innerHTML = `<div class="text-center py-8 text-gray-400"><i class="fa-solid fa-folder-open text-4xl mb-2"></i><p>ไม่พบข้อมูล</p></div>`;
+                    return;
+                }
+
+                // Slice if not searching/filtering
+                const displayRows = (term || state.currentFilter !== 'all') ? rows : rows.slice(0, 3);
+
+                DOM.dashboard.innerHTML = `<div class="space-y-3">${displayRows.map(row => {
+                    const dateObj = Utils.toGregorian(row.formattedDate);
+                    const status = Utils.getStatus(dateObj);
+                    const statusClass = { future: 'bg-green-500', today: 'bg-yellow-500', past: 'bg-gray-400' }[status];
+                    const msg = row.smsMessage || Utils.generateMessage(row.petName, row.appointmentType, row.formattedDate);
+                    const isCopied = state.copiedRows.has(row.rowNumber);
+
+                    return `
+                        <div class="card p-4 relative hover:-translate-y-1 transition duration-200" 
+                             data-row="${row.rowNumber}" data-msg="${encodeURIComponent(msg)}"
+                             data-pet="${row.petName}" data-phone="${row.phone}" 
+                             data-type="${row.appointmentType}" data-date="${row.formattedDate}">
+                            <div class="absolute top-3 right-3 w-3 h-3 rounded-full ${statusClass} ring-2 ring-white"></div>
+                            <div class="flex justify-between items-start mb-1">
+                                <h3 class="font-bold text-lg text-gray-800">${row.petName}</h3>
+                                <div class="flex gap-1 pr-4">
+                                    <button class="action-btn ${isCopied ? 'copy-btn copied' : 'copy-btn'}" title="คัดลอก SMS">
+                                        <i class="${isCopied ? 'fa-solid fa-check' : 'fa-regular fa-copy'}"></i>
+                                    </button>
+                                    <div class="w-px bg-gray-200 mx-1 h-6 self-center"></div>
+                                    <button class="edit-btn action-btn text-gray-500 hover:text-blue-600"><i class="fa-solid fa-pencil"></i></button>
+                                    <button class="delete-btn action-btn text-gray-500 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-1"><i class="fa-solid fa-syringe w-4 text-center mr-1"></i> ${row.appointmentType.split(' คำแนะนำ')[0]}</p>
+                            <div class="flex text-sm text-gray-500 gap-4">
+                                <span><i class="fa-solid fa-phone w-4 text-center mr-1"></i>${row.phone}</span>
+                                <span><i class="fa-solid fa-calendar w-4 text-center mr-1"></i>${row.formattedDate}</span>
+                            </div>
+                        </div>`;
+                }).join('')}</div>`;
+            },
+
+            updateFormState: () => {
+                const { isEditing } = state;
+                DOM.formTitle.icon.className = isEditing ? 'fa-solid fa-pencil mr-3 text-amber-500' : 'fa-solid fa-file-pen mr-3 text-blue-600';
+                DOM.formTitle.text.textContent = isEditing ? 'แก้ไขข้อมูล' : 'สร้างข้อความแจ้งเตือน';
+                
+                DOM.submitBtn.className = isEditing 
+                    ? 'bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg flex items-center justify-center w-full transition'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg flex items-center justify-center w-full transition';
+                
+                DOM.submitBtnElements.text.textContent = isEditing ? 'อัปเดตข้อมูล' : 'บันทึก';
+                DOM.submitBtnElements.icon.className = isEditing ? 'fa-solid fa-floppy-disk mr-2' : 'fa-solid fa-paper-plane mr-2';
+                DOM.clearBtnText.textContent = isEditing ? 'ยกเลิก' : 'ล้างข้อมูล';
+                
+                Validation.check();
+            }
+        };
+
+        /**
+         * VALIDATION LOGIC
+         */
+        const Validation = {
+            check: () => {
+                let isValid = true;
+                DOM.form.querySelectorAll('[required]').forEach(el => {
+                    if (!el.value.trim()) isValid = false;
+                });
+
+                const phoneVal = DOM.phoneInput.value;
+                const phoneRegex = /^0\d{9}$/;
+                
+                if (phoneVal) {
+                    if (!phoneRegex.test(phoneVal)) {
+                        isValid = false;
+                        DOM.phoneInput.classList.add('invalid');
+                        DOM.phoneError.style.display = 'block';
+                        DOM.phoneError.textContent = !phoneVal.startsWith('0') ? 'ต้องขึ้นต้นด้วย 0' : 
+                                                     phoneVal.length < 10 ? 'ต้องครบ 10 หลัก' : 'รูปแบบไม่ถูกต้อง';
+                    } else {
+                        DOM.phoneInput.classList.remove('invalid');
+                        DOM.phoneError.style.display = 'none';
+                    }
+                }
+                DOM.submitBtn.disabled = !isValid;
+            }
+        };
+
+        /**
+         * EVENT HANDLERS
+         */
+        const Handlers = {
+            submit: (e) => {
+                e.preventDefault();
+                const formData = {
+                    action: state.isEditing ? 'update' : 'create',
+                    petName: DOM.petInput.value.trim(),
+                    phoneNumber: DOM.phoneInput.value.trim(),
+                    appointmentType: document.getElementById('appointmentType').value,
+                    sendDate: Utils.toBuddhistEra(DOM.sendDateInput.value),
+                    rowNumber: state.editingRowNumber
+                };
+
+                // Duplicate Check (Only on Create)
+                if (!state.isEditing) {
+                    const isDup = state.allRows.some(r => r.petName === formData.petName && r.formattedDate === formData.sendDate);
+                    if (isDup) {
+                        Swal.fire({
+                            title: 'พบข้อมูลซ้ำ!', text: `มีน้อง ${formData.petName} วันที่ ${formData.sendDate} แล้ว ยืนยันบันทึก?`,
+                            icon: 'warning', showCancelButton: true, confirmButtonText: 'ยืนยัน', cancelButtonText: 'ยกเลิก'
+                        }).then((res) => {
+                            if (res.isConfirmed) API.submitData(formData, 'กำลังบันทึก...', Handlers.onSaveSuccess);
+                        });
+                        return;
+                    }
+                }
+                
+                API.submitData(formData, state.isEditing ? 'กำลังอัปเดต...' : 'กำลังบันทึก...', Handlers.onSaveSuccess);
+            },
+
+            onSaveSuccess: () => {
+                Toast.fire({ icon: 'success', title: state.isEditing ? 'อัปเดตเรียบร้อย' : 'บันทึกเรียบร้อย' });
+                Handlers.resetForm();
+                API.fetchData();
+            },
+
+            edit: (rowNumber, data) => {
+                state.isEditing = true;
+                state.editingRowNumber = rowNumber;
+                DOM.petInput.value = data.pet;
+                DOM.phoneInput.value = data.phone;
+                document.getElementById('appointmentType').value = data.type;
+                
+                const gDate = Utils.toGregorian(data.date);
+                if(gDate) datePicker.setDate(gDate);
+                
+                UI.updateFormState();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            },
+
+            delete: (rowNumber) => {
+                Swal.fire({
+                    title: 'ลบข้อมูล?', icon: 'warning', showCancelButton: true,
+                    confirmButtonColor: '#d33', confirmButtonText: 'ลบเลย', cancelButtonText: 'ยกเลิก'
+                }).then((res) => {
+                    if (res.isConfirmed) {
+                        API.submitData({ action: 'delete', rowNumber }, 'กำลังลบ...', () => {
+                            // Optimistic UI Removal
+                            state.allRows = state.allRows.filter(r => r.rowNumber != rowNumber);
+                            // Adjust remaining row numbers
+                            state.allRows.forEach(r => { if(r.rowNumber > rowNumber) r.rowNumber--; });
+                            UI.renderDashboard();
+                            Toast.fire({ icon: 'success', title: 'ลบข้อมูลแล้ว' });
+                        }, () => {
+                            // On Error (Data mismatch), force reload
+                            API.fetchData();
+                        });
+                    }
+                });
+            },
+
+            resetForm: () => {
+                state.isEditing = false;
+                state.editingRowNumber = null;
+                DOM.form.reset();
+                datePicker.setDate(new Date());
+                UI.updateFormState();
+            },
+
+            filter: (type) => {
+                state.currentFilter = type;
+                DOM.filters.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.filter === type);
+                    // Tailwind toggle
+                    if(btn.dataset.filter === type) {
+                        btn.className = "filter-btn active px-4 py-2 rounded-full bg-blue-50 text-blue-600 border border-blue-200 text-sm font-medium whitespace-nowrap transition-colors";
+                    } else {
+                        btn.className = "filter-btn px-4 py-2 rounded-full bg-white text-gray-600 border border-gray-200 text-sm font-medium whitespace-nowrap transition-colors hover:bg-gray-50";
+                    }
+                });
+                UI.renderDashboard();
+            },
+
+            autocomplete: (input, type) => {
+                const val = input.value.trim().toLowerCase();
+                const list = DOM.suggestions[type];
+                
+                // Real-time validation
+                if(type === 'phone') input.value = input.value.replace(/[^0-9]/g, '');
+                Validation.check();
+
+                if (val.length < 2) { list.style.display = 'none'; return; }
+
+                const matches = [];
+                const seen = new Set();
+                
+                state.allRows.forEach(r => {
+                    const target = type === 'phone' ? r.phone : r.petName.toLowerCase();
+                    if (target.includes(val)) {
+                        const key = r.phone + r.petName;
+                        if (!seen.has(key)) {
+                            seen.add(key);
+                            matches.push(r);
+                        }
+                    }
+                });
+
+                if (matches.length > 0) {
+                    list.innerHTML = matches.slice(0, 5).map(r => `
+                        <div class="suggestion-item" onclick="Handlers.fill('${r.petName.replace(/'/g, "\\'")}', '${r.phone}')">
+                            <span class="font-semibold text-gray-800">${type === 'phone' ? r.phone : r.petName}</span>
+                            <span class="text-sm text-gray-500">${type === 'phone' ? r.petName : r.phone}</span>
+                        </div>
+                    `).join('');
+                    list.style.display = 'block';
+                } else {
+                    list.style.display = 'none';
+                }
+            },
+
+            fill: (pet, phone) => {
+                DOM.petInput.value = pet;
+                DOM.phoneInput.value = phone;
+                Object.values(DOM.suggestions).forEach(el => el.style.display = 'none');
+                Validation.check();
+            },
+
+            // New method to add days
+            addDays: (days) => {
+                const currentDate = datePicker.selectedDates[0];
+                if (!currentDate) return; 
+                
+                const newDate = new Date(currentDate);
+                newDate.setDate(currentDate.getDate() + days);
+                
+                datePicker.setDate(newDate, true); // Update and trigger change
+                Validation.check();
+            }
+        };
+
+        // Expose fill to global for onclick
+        window.Handlers = Handlers;
+
+        /**
+         * INITIALIZATION & LISTENERS
+         */
+        
+        // Form
+        DOM.form.addEventListener('submit', Handlers.submit);
+        DOM.clearBtn.addEventListener('click', Handlers.resetForm);
+        
+        // Inputs
+        DOM.phoneInput.addEventListener('input', () => Handlers.autocomplete(DOM.phoneInput, 'phone'));
+        DOM.petInput.addEventListener('input', () => Handlers.autocomplete(DOM.petInput, 'pet'));
+        document.getElementById('appointmentType').addEventListener('change', Validation.check);
+        document.addEventListener('click', (e) => {
+            if(!e.target.closest('.input-with-icon')) Object.values(DOM.suggestions).forEach(el => el.style.display = 'none');
         });
 
-        document.getElementById('clearBtn').addEventListener('click', exitEditMode);
-        dashboard.addEventListener('click', function(e) {
-            const item = e.target.closest('.dashboard-item');
-            if (!item) return;
+        // Quick Date Buttons Listeners
+        DOM.add1DayBtn.addEventListener('click', () => Handlers.addDays(1));
+        DOM.add2DayBtn.addEventListener('click', () => Handlers.addDays(2));
+
+        // Dashboard Actions
+        DOM.dashboard.addEventListener('click', (e) => {
+            const card = e.target.closest('.card');
+            if (!card) return;
             
+            // Copy
             const copyBtn = e.target.closest('.copy-btn');
             if (copyBtn) {
-                const message = decodeURIComponent(item.dataset.message);
-                copyToClipboard(message, copyBtn, item.dataset.rowNumber);
+                Utils.copyText(decodeURIComponent(card.dataset.msg), copyBtn, parseInt(card.dataset.row));
                 return;
             }
+            // Edit
+            if (e.target.closest('.edit-btn')) {
+                Handlers.edit(card.dataset.row, {
+                    pet: card.dataset.pet, phone: card.dataset.phone, 
+                    type: card.dataset.type, date: card.dataset.date
+                });
+            }
+            // Delete
+            if (e.target.closest('.delete-btn')) {
+                Handlers.delete(card.dataset.row);
+            }
+        });
 
-            if (e.target.closest('.edit-btn')) enterEditMode(item);
-            if (e.target.closest('.delete-btn')) handleDelete(item.dataset.rowNumber);
-        });
-        
-        requiredInputs.forEach(input => {
-            input.addEventListener('input', validateForm);
-        });
-        
-        datePicker.config.onChange.push(function() {
-            validateForm();
-        });
+        // Filter & Search
+        DOM.refreshBtn.addEventListener('click', API.fetchData);
+        DOM.searchInput.addEventListener('input', UI.renderDashboard);
+        DOM.filters.forEach(btn => btn.addEventListener('click', () => Handlers.filter(btn.dataset.filter)));
 
-        // --- INITIAL LOAD ---
-        setFilter('all'); // Set default filter UI
-        setupAutocomplete(); 
-        exitEditMode();
-        loadDashboard();
+        // Start
+        datePicker.config.onChange.push(Validation.check);
+        Handlers.resetForm();
+        API.fetchData();
+
     </script>
 </body>
 </html>
