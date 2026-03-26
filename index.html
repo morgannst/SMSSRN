@@ -22,11 +22,7 @@
         .card { background-color: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e5e7eb; }
         
         /* Inputs */
-        .form-input {
-            width: 100%; border-radius: 0.75rem; border: 1px solid #d1d5db;
-            padding: 0.75rem 1rem 0.75rem 2.75rem; transition: all 0.2s;
-            background-color: white;
-        }
+        .form-input { width: 100%; border-radius: 0.75rem; border: 1px solid #d1d5db; padding: 0.75rem 1rem 0.75rem 2.75rem; transition: all 0.2s; background-color: white; }
         .form-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); outline: none; }
         .form-input.invalid { border-color: #ef4444; }
         .input-with-icon { position: relative; }
@@ -39,36 +35,21 @@
         .copy-btn:hover { background-color: #d1fae5; }
         .copy-btn.copied { color: #6b7280; background-color: #f3f4f6; }
         button:disabled { opacity: 0.6; cursor: not-allowed; }
-
+        
         /* Validation & Filters */
         .validation-message { color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: none; }
         .filter-btn.active { background-color: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
         
         /* Autocomplete */
-        .suggestions-list {
-            position: absolute; top: 100%; left: 0; right: 0;
-            background: white; border: 1px solid #e5e7eb; border-radius: 0.75rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            z-index: 50; max-height: 200px; overflow-y: auto; margin-top: 4px; display: none;
-        }
-        .suggestion-item {
-            padding: 0.75rem 1rem; cursor: pointer; border-bottom: 1px solid #f3f4f6;
-            display: flex; justify-content: space-between; align-items: center;
-        }
+        .suggestions-list { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e5e7eb; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); z-index: 50; max-height: 200px; overflow-y: auto; margin-top: 4px; display: none; }
+        .suggestion-item { padding: 0.75rem 1rem; cursor: pointer; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; }
         .suggestion-item:hover { background-color: #f9fafb; }
         
-        /* Skeleton Animation */
+        /* Animations */
         @keyframes pulse { 50% { opacity: .5; } }
         .skeleton { background-color: #e5e7eb; animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; border-radius: 0.5rem; }
-        
-        /* AI Magic Glow */
-        @keyframes ai-glow {
-            0% { box-shadow: 0 0 5px #a855f7, 0 0 10px #a855f7; }
-            50% { box-shadow: 0 0 10px #d8b4fe, 0 0 20px #d8b4fe; }
-            100% { box-shadow: 0 0 5px #a855f7, 0 0 10px #a855f7; }
-        }
+        @keyframes ai-glow { 0% { box-shadow: 0 0 5px #a855f7, 0 0 10px #a855f7; } 50% { box-shadow: 0 0 10px #d8b4fe, 0 0 20px #d8b4fe; } 100% { box-shadow: 0 0 5px #a855f7, 0 0 10px #a855f7; } }
         .ai-active { animation: ai-glow 2s infinite; border-color: #a855f7 !important; }
-
         .flatpickr-calendar { font-family: 'Sarabun', sans-serif; }
     </style>
 </head>
@@ -105,7 +86,6 @@
                     </div>
                     <p class="text-xs text-purple-400 mt-1 ml-1 mb-2">พิมพ์ข้อมูลดิบแล้วให้ AI ช่วยกรอกฟอร์ม</p>
                     
-                    <!-- AI Prompt Chips -->
                     <div class="flex flex-wrap gap-2 mt-1">
                         <button type="button" class="prompt-chip bg-white border border-purple-200 text-purple-600 hover:bg-purple-100 text-xs px-2 py-1 rounded-full transition shadow-sm">ฉีดวัคซีนสุนัข</button>
                         <button type="button" class="prompt-chip bg-white border border-purple-200 text-purple-600 hover:bg-purple-100 text-xs px-2 py-1 rounded-full transition shadow-sm">ฉีดวัคซีนแมว</button>
@@ -123,7 +103,7 @@
                 </h2>
                 
                 <form id="smsForm" class="space-y-5">
-                    <!-- Phone -->
+                    <!-- Phone Input -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">เบอร์ติดต่อ (10 หลัก)</label>
                         <div class="input-with-icon relative">
@@ -133,11 +113,10 @@
                             <div id="phone-suggestions" class="suggestions-list"></div>
                         </div>
                         <p id="phone-error" class="validation-message">กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง</p>
-                        <!-- Container แจ้งข้อมูลลูกค้าจาก CDP -->
                         <div id="customer-info-container" class="mt-2 hidden"></div>
                     </div>
 
-                    <!-- Pet Name -->
+                    <!-- Pet Name Input -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">ชื่อสัตว์เลี้ยง</label>
                         <div class="input-with-icon relative">
@@ -146,11 +125,10 @@
                                    class="form-input" placeholder="เช่น น้องนำโชค" autocomplete="off">
                             <div id="pet-suggestions" class="suggestions-list"></div>
                         </div>
-                        <!-- แท็กรายชื่อสัตว์เลี้ยงที่ผูกกับเบอร์โทร -->
                         <div id="pet-tags-container" class="flex flex-wrap gap-2 mt-2 hidden"></div>
                     </div>
 
-                    <!-- Appointment Type -->
+                    <!-- Appointment Type Input -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">ประเภทนัดหมาย</label>
                         <div class="input-with-icon">
@@ -160,7 +138,6 @@
                             </select>
                         </div>
                         
-                        <!-- Quick Appointment Buttons -->
                         <div class="flex flex-wrap gap-2 mt-2">
                             <button type="button" class="quick-appt-btn bg-indigo-50 border border-indigo-100 text-indigo-600 hover:bg-indigo-100 text-xs px-2.5 py-1 rounded-full transition shadow-sm" data-val="ฉีดวัคซีนรวมสุนัข คำแนะนำ : งดอาบน้ำ 7 วัน">🐶 วัคซีนสุนัข</button>
                             <button type="button" class="quick-appt-btn bg-indigo-50 border border-indigo-100 text-indigo-600 hover:bg-indigo-100 text-xs px-2.5 py-1 rounded-full transition shadow-sm" data-val="ฉีดวัคซีนรวมแมว คำแนะนำ : งดอาบน้ำ 7 วัน">🐱 วัคซีนแมว</button>
@@ -169,7 +146,7 @@
                         </div>
                     </div>
 
-                    <!-- Date -->
+                    <!-- Date Input -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">วันที่ส่ง SMS</label>
                         <div class="flex gap-2">
@@ -182,7 +159,7 @@
                         </div>
                     </div>
 
-                    <!-- Buttons -->
+                    <!-- Form Buttons -->
                     <div id="form-buttons-container" class="pt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <button type="button" id="clearBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-2 rounded-lg flex items-center justify-center transition">
                             <i class="fa-solid fa-eraser mr-1"></i><span id="clearBtn-text">ล้างฟอร์ม</span>
@@ -214,45 +191,36 @@
                     </div>
                 </div>
 
-                <!-- Filters -->
                 <div class="flex gap-2 mb-4 overflow-x-auto pb-2 no-scrollbar">
                     <button data-filter="all" class="filter-btn active px-4 py-2 rounded-full bg-white text-gray-600 border border-gray-200 text-sm font-medium whitespace-nowrap transition">ทั้งหมด</button>
                     <button data-filter="today" class="filter-btn px-4 py-2 rounded-full bg-white text-gray-600 border border-gray-200 text-sm font-medium whitespace-nowrap transition"><i class="fa-solid fa-calendar-day mr-1 text-yellow-500"></i> นัดวันนี้</button>
                     <button data-filter="tomorrow" class="filter-btn px-4 py-2 rounded-full bg-white text-gray-600 border border-gray-200 text-sm font-medium whitespace-nowrap transition"><i class="fa-solid fa-calendar-plus mr-1 text-green-500"></i> นัดพรุ่งนี้</button>
                 </div>
 
-                <!-- Search -->
                 <div class="mb-6 relative">
                     <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-400"></i>
                     <input type="text" id="searchInput" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm" placeholder="ค้นหาชื่อ หรือ เบอร์โทร...">
                 </div>
                 
-                <!-- List -->
                 <div id="dashboard" class="space-y-4 min-h-[200px]"></div>
             </div>
         </div>
     </main>
     
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/th.js"></script>
 
     <script>
         /**
          * ==========================================
-         * CONFIGURATION & CONSTANTS
+         * CONFIGURATION
          * ==========================================
          */
         const CONFIG = {
-            // URL ของระบบ SMS เดิม (เก็บประวัติ / จัดการ AI)
             SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwwtzEUk2yuCCoxrd53YRXfgN9cP6rtr3ixeLr9iD7aRNjuvx9TMk76Rq50hPpvYuyV/exec",
             GVIZ_URL: "https://docs.google.com/spreadsheets/d/1UltCx_5u19F675ELpi7OUAxQJFh6UkbD6Qq__jQoL5Q/gviz/tq?tqx=out:json&sheet=SMS",
-            
-            // 🆕 URL ของระบบ CDP ใหม่ที่คุณเพิ่งสร้าง
             CDP_URL: "https://script.google.com/macros/s/AKfycbyzJk1Div6Pa1otgN3KO-3pcVINmH8jKMKgfEhxShIgwtvQoe_xxZDwo5KXs-3PIbImtg/exec",
-            
             SMS_FOOTER: "\nหากต้องการเลื่อนนัด/สอบถาม โทร 0634461952 หรือ LINE: @SRNANIMALCARE\nโรงพยาบาลสัตว์สุราษฎร์ธานี (ใน บขส.ใหม่)",
-            
             APPOINTMENT_TYPES: [
                 { label: "ฉีดวัคซีนรวมสุนัข+พิษสุนัขบ้า", value: "ฉีดวัคซีนรวมสุนัขและวัคซีนป้องกันโรคพิษสุนัขบ้า คำแนะนำ : งดอาบน้ำ 7 วัน" },
                 { label: "ฉีดวัคซีนรวมสุนัข", value: "ฉีดวัคซีนรวมสุนัข คำแนะนำ : งดอาบน้ำ 7 วัน" },
@@ -277,11 +245,6 @@
             ]
         };
 
-        /**
-         * ==========================================
-         * DOM ELEMENTS CACHE
-         * ==========================================
-         */
         const DOM = {
             form: document.getElementById('smsForm'),
             dashboard: document.getElementById('dashboard'),
@@ -292,7 +255,7 @@
             refreshBtn: document.getElementById('refreshBtn'),
             searchInput: document.getElementById('searchInput'),
             phoneInput: document.getElementById('phoneNumber'),
-            customerInfoContainer: document.getElementById('customer-info-container'), // กล่องข้อมูลลูกค้า CDP
+            customerInfoContainer: document.getElementById('customer-info-container'),
             petInput: document.getElementById('petName'),
             petTagsContainer: document.getElementById('pet-tags-container'),
             sendDateInput: document.getElementById('sendDate'),
@@ -303,18 +266,9 @@
             add2DayBtn: document.getElementById('add2DayBtn'),
             aiInput: document.getElementById('aiInput'),
             aiFillBtn: document.getElementById('aiFillBtn'),
-            suggestions: {
-                phone: document.getElementById('phone-suggestions'),
-                pet: document.getElementById('pet-suggestions')
-            },
-            formHeader: {
-                title: document.querySelector('#form-header span'),
-                icon: document.querySelector('#form-header i')
-            },
-            submitBtnEl: {
-                text: document.getElementById('submitBtn-text'),
-                icon: document.getElementById('submitBtn-icon')
-            },
+            suggestions: { phone: document.getElementById('phone-suggestions'), pet: document.getElementById('pet-suggestions') },
+            formHeader: { title: document.querySelector('#form-header span'), icon: document.querySelector('#form-header i') },
+            submitBtnEl: { text: document.getElementById('submitBtn-text'), icon: document.getElementById('submitBtn-icon') },
             clearBtnText: document.getElementById('clearBtn-text'),
             filters: document.querySelectorAll('.filter-btn'),
             appointmentSelect: document.getElementById('appointmentType'),
@@ -327,164 +281,126 @@
             didOpen: (toast) => { toast.onmouseenter = Swal.stopTimer; toast.onmouseleave = Swal.resumeTimer; }
         });
 
-        /**
-         * ==========================================
-         * STATE MANAGEMENT
-         * ==========================================
-         */
         const State = {
-            isEditing: false,
-            editingRowNumber: null,
-            allRows: [],
-            currentFilter: 'all',
-            copiedRows: new Set()
+            isEditing: false, editingRowNumber: null, allRows: [], currentFilter: 'all', copiedRows: new Set()
         };
 
         /**
          * ==========================================
-         * VALIDATION LOGIC
+         * UTILITIES
          * ==========================================
          */
-        const Validation = {
-            check: () => {
-                let isValid = true;
-                DOM.form.querySelectorAll('[required]').forEach(el => {
-                    if (!el.value.trim()) isValid = false;
-                });
-
-                const phoneVal = DOM.phoneInput.value;
-                const phoneRegex = /^0\d{9}$/;
-                
-                if (phoneVal) {
-                    if (!phoneRegex.test(phoneVal)) {
-                        isValid = false;
-                        DOM.phoneInput.classList.add('invalid');
-                        DOM.phoneError.style.display = 'block';
-                        DOM.phoneError.textContent = !phoneVal.startsWith('0') ? 'ต้องขึ้นต้นด้วย 0' : 
-                                                     phoneVal.length < 10 ? 'ต้องครบ 10 หลัก' : 'รูปแบบไม่ถูกต้อง';
-                    } else {
-                        DOM.phoneInput.classList.remove('invalid');
-                        DOM.phoneError.style.display = 'none';
-                    }
-                }
-                
-                DOM.submitBtn.disabled = !isValid;
-                if(DOM.saveAndAddBtn) DOM.saveAndAddBtn.disabled = !isValid;
-            }
-        };
-
-        /**
-         * ==========================================
-         * UTILITY FUNCTIONS
-         * ==========================================
-         */
-        const datePicker = flatpickr("#sendDate", {
-            locale: "th", altInput: true, altFormat: "d F Y", dateFormat: "Y-m-d",
-            defaultDate: new Date(), disableMobile: true,
-            onChange: () => Validation.check()
-        });
-
         const Utils = {
+            /** * Robust JSONP Fetch with Auto-Timeout 
+             * Prevents infinite hanging if server is down.
+             */
+            fetchJSONP: (url, params, prefix = 'cb', timeoutMs = 15000) => {
+                return new Promise((resolve, reject) => {
+                    const cbName = `${prefix}_${Date.now()}_${Math.floor(Math.random()*1000)}`;
+                    const script = document.createElement('script');
+                    
+                    const timeout = setTimeout(() => {
+                        script.remove(); delete window[cbName];
+                        reject(new Error('Request Timeout: Server took too long to respond.'));
+                    }, timeoutMs);
+
+                    window[cbName] = (res) => {
+                        clearTimeout(timeout); script.remove(); delete window[cbName];
+                        resolve(res);
+                    };
+                    script.onerror = () => {
+                        clearTimeout(timeout); script.remove(); delete window[cbName];
+                        reject(new Error('Network Error: Could not connect to the server.'));
+                    };
+
+                    const urlParams = new URLSearchParams({ ...params, callback: cbName });
+                    script.src = `${url}?${urlParams.toString()}`;
+                    document.body.appendChild(script);
+                });
+            },
             toBuddhistEra: (dateStr) => {
                 if (!dateStr) return '';
                 const date = new Date(dateStr);
                 return `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear() + 543}`;
             },
-            
             toGregorian: (buddhistDateStr) => {
                 if (!buddhistDateStr || !buddhistDateStr.includes('/')) return null;
                 const [d, m, y] = buddhistDateStr.split('/');
                 return new Date(parseInt(y) - 543, parseInt(m) - 1, parseInt(d));
             },
-
             getStatus: (dateObj) => {
                 if (!dateObj) return 'past';
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                dateObj.setHours(0, 0, 0, 0);
+                const today = new Date(); today.setHours(0, 0, 0, 0); dateObj.setHours(0, 0, 0, 0);
                 if (dateObj > today) return 'future';
                 if (dateObj.getTime() === today.getTime()) return 'today';
                 return 'past';
             },
-
             generateMessage: (pet, type, date) => {
                 const appt = type.split(' คำแนะนำ')[0];
                 return `แจ้งเตือนนัดหมายน้อง ${pet} วันพรุ่งนี้ (${date})\nนัด : ${appt}${CONFIG.SMS_FOOTER}`;
             },
-
             copyText: (text, btn, rowNum) => {
-                const area = document.createElement('textarea');
-                area.value = text;
-                area.style.position = 'fixed'; area.style.left = '-9999px';
-                document.body.appendChild(area);
-                area.select();
+                const area = document.createElement('textarea'); area.value = text;
+                area.style.position = 'fixed'; area.style.left = '-9999px'; document.body.appendChild(area); area.select();
                 try {
-                    document.execCommand('copy');
-                    Toast.fire({ icon: 'success', title: 'คัดลอกข้อความแล้ว' });
+                    document.execCommand('copy'); Toast.fire({ icon: 'success', title: 'คัดลอกข้อความแล้ว' });
                     State.copiedRows.add(rowNum);
-                    if(btn) {
-                        btn.classList.add('copied');
-                        btn.innerHTML = '<i class="fa-solid fa-check"></i>';
-                    }
-                } catch(e) {
-                    Swal.fire('Error', 'คัดลอกไม่สำเร็จ', 'error');
-                }
+                    if(btn) { btn.classList.add('copied'); btn.innerHTML = '<i class="fa-solid fa-check"></i>'; }
+                } catch(e) { Swal.fire('Error', 'คัดลอกไม่สำเร็จ', 'error'); }
                 document.body.removeChild(area);
             },
-
             addDays: (days) => {
                 const currentDate = datePicker.selectedDates[0] || new Date();
-                const newDate = new Date(currentDate);
-                newDate.setDate(currentDate.getDate() + days);
-                datePicker.setDate(newDate, true);
-                Validation.check();
+                const newDate = new Date(currentDate); newDate.setDate(currentDate.getDate() + days);
+                datePicker.setDate(newDate, true); Validation.check();
             }
         };
 
+        const Validation = {
+            check: () => {
+                let isValid = true;
+                DOM.form.querySelectorAll('[required]').forEach(el => { if (!el.value.trim()) isValid = false; });
+                const phoneVal = DOM.phoneInput.value;
+                if (phoneVal) {
+                    if (!/^0\d{9}$/.test(phoneVal)) {
+                        isValid = false; DOM.phoneInput.classList.add('invalid'); DOM.phoneError.style.display = 'block';
+                        DOM.phoneError.textContent = !phoneVal.startsWith('0') ? 'ต้องขึ้นต้นด้วย 0' : phoneVal.length < 10 ? 'ต้องครบ 10 หลัก' : 'รูปแบบไม่ถูกต้อง';
+                    } else {
+                        DOM.phoneInput.classList.remove('invalid'); DOM.phoneError.style.display = 'none';
+                    }
+                }
+                DOM.submitBtn.disabled = !isValid;
+                if(DOM.saveAndAddBtn) DOM.saveAndAddBtn.disabled = !isValid;
+            }
+        };
+
+        const datePicker = flatpickr("#sendDate", {
+            locale: "th", altInput: true, altFormat: "d F Y", dateFormat: "Y-m-d",
+            defaultDate: new Date(), disableMobile: true, onChange: () => Validation.check()
+        });
+
         /**
          * ==========================================
-         * 🐶 CDP SERVICE (ดึงข้อมูลเจ้าของและสัตว์เลี้ยง)
+         * SERVICES (CDP, AI, API)
          * ==========================================
          */
         const CDPService = {
             searchByPhone: async (phone) => {
-                // แสดงสถานะกำลังโหลด
                 DOM.customerInfoContainer.innerHTML = '<span class="text-sm text-gray-500 flex items-center"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังค้นหาข้อมูลลูกค้าในระบบ...</span>';
                 DOM.customerInfoContainer.classList.remove('hidden');
                 DOM.petTagsContainer.classList.add('hidden');
 
-                const cbName = 'jsonp_cdp_' + Date.now();
-                const script = document.createElement('script');
-                
-                const promise = new Promise((resolve, reject) => {
-                    window[cbName] = (res) => {
-                        script.remove();
-                        delete window[cbName];
-                        if (res.status === 'success') resolve(res.data);
-                        else reject(new Error(res.error || 'Unknown Error'));
-                    };
-                    script.onerror = () => {
-                        script.remove();
-                        delete window[cbName];
-                        reject(new Error('Network Error'));
-                    };
-                });
-
-                const params = new URLSearchParams({ action: 'searchByPhone', phone: phone, callback: cbName });
-                script.src = `${CONFIG.CDP_URL}?${params.toString()}`;
-                document.body.appendChild(script);
-
                 try {
-                    const data = await promise;
-                    if (data.found) {
-                        // แสดงชื่อเจ้าของ
+                    const res = await Utils.fetchJSONP(CONFIG.CDP_URL, { action: 'searchByPhone', phone: phone }, 'cdpSearch', 10000);
+                    
+                    if (res.status === 'success' && res.data.found) {
+                        const data = res.data;
                         const tierBadge = data.customer.tier ? `<span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-0.5 rounded ml-2 border border-yellow-200">${data.customer.tier}</span>` : '';
                         DOM.customerInfoContainer.innerHTML = `
                             <div class="bg-blue-50 border border-blue-100 text-blue-800 px-4 py-2 rounded-lg text-sm flex items-center justify-between">
                                 <div><i class="fa-solid fa-user-check mr-2 text-blue-600"></i>เจ้าของ: <b>${data.customer.fullName}</b> ${tierBadge}</div>
                             </div>`;
                         
-                        // แสดงปุ่มสัตว์เลี้ยง
                         if (data.pets && data.pets.length > 0) {
                             DOM.petTagsContainer.innerHTML = data.pets.map(p => {
                                 const isCat = p.species && p.species.includes('แมว');
@@ -498,60 +414,31 @@
                             DOM.petTagsContainer.classList.remove('hidden');
                         }
                     } else {
-                        // ลูกค้าใหม่
                         DOM.customerInfoContainer.innerHTML = `<span class="text-sm text-gray-500 italic ml-1"><i class="fa-solid fa-user-plus mr-1"></i> ลูกค้าใหม่ (ไม่พบประวัติในระบบ)</span>`;
                     }
                 } catch (err) {
                     console.error("CDP Search Error:", err);
-                    DOM.customerInfoContainer.innerHTML = `<span class="text-sm text-red-500"><i class="fa-solid fa-triangle-exclamation mr-1"></i> ระบบ CDP ขัดข้อง (ดึงข้อมูลไม่ได้)</span>`;
+                    DOM.customerInfoContainer.innerHTML = `<span class="text-sm text-red-500"><i class="fa-solid fa-triangle-exclamation mr-1"></i> ${err.message || 'ระบบ CDP ขัดข้อง'}</span>`;
                 }
             }
         };
 
-        /**
-         * ==========================================
-         * GEMINI AI SERVICE
-         * ==========================================
-         */
         const AIService = {
             processText: async (text) => {
-                const button = DOM.aiFillBtn;
-                const originalText = button.innerHTML;
-                const inputField = DOM.aiInput;
-                
+                const button = DOM.aiFillBtn; const originalText = button.innerHTML; const inputField = DOM.aiInput;
                 try {
-                    button.disabled = true;
-                    button.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> คิดอยู่...';
+                    button.disabled = true; button.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> คิดอยู่...';
                     inputField.classList.add('ai-active');
 
                     const options = CONFIG.APPOINTMENT_TYPES.map(o => o.value).join(", ");
-                    const cbName = 'jsonp_ai_' + Date.now();
-                    const script = document.createElement('script');
+                    const res = await Utils.fetchJSONP(CONFIG.SCRIPT_URL, { action: 'processAi', text: text, options: options }, 'ai', 20000);
                     
-                    const promise = new Promise((resolve, reject) => {
-                        window[cbName] = (res) => {
-                            script.remove();
-                            delete window[cbName];
-                            if (res.result === 'success') resolve(res.data);
-                            else reject(new Error(res.error || 'Unknown Error'));
-                        };
-                        script.onerror = () => {
-                            script.remove();
-                            delete window[cbName];
-                            reject(new Error('Network Error'));
-                        };
-                    });
+                    if (res.result !== 'success') throw new Error(res.error);
+                    const result = res.data;
 
-                    const params = new URLSearchParams({ action: 'processAi', text: text, options: options, callback: cbName });
-                    script.src = `${CONFIG.SCRIPT_URL}?${params.toString()}`;
-                    document.body.appendChild(script);
-
-                    const result = await promise;
-
-                    if (result.petName) DOM.petInput.value = result.petName;
+                    if (result.petName) App.fillPetName(result.petName, false);
                     if (result.phoneNumber) {
                         DOM.phoneInput.value = result.phoneNumber;
-                        // ให้ AI ช่วยค้นหา CDP ต่อเลย
                         if(result.phoneNumber.length === 10) CDPService.searchByPhone(result.phoneNumber);
                     }
                     if (result.appointmentType) DOM.appointmentSelect.value = result.appointmentType;
@@ -559,89 +446,80 @@
 
                     Toast.fire({ icon: 'success', title: 'AI เติมข้อมูลให้แล้ว!' });
                     Validation.check();
-
                 } catch (error) {
-                    console.error("AI Error:", error);
-                    Toast.fire({ icon: 'error', title: 'ขออภัย AI ไม่เข้าใจประโยคนี้' });
+                    console.error("AI Error:", error); Toast.fire({ icon: 'error', title: 'ขออภัย AI ไม่เข้าใจประโยคนี้' });
                 } finally {
-                    button.disabled = false;
-                    button.innerHTML = originalText;
-                    inputField.classList.remove('ai-active');
+                    button.disabled = false; button.innerHTML = originalText; inputField.classList.remove('ai-active');
                 }
             }
         };
 
-        /**
-         * ==========================================
-         * API & DATA SERVICE (ประวัติ SMS เดิม)
-         * ==========================================
-         */
         const API = {
             fetchData: async () => {
                 UI.showSkeleton();
                 try {
-                    const rnd = Math.floor(Math.random() * 999999);
-                    const res = await fetch(`${CONFIG.GVIZ_URL}&t=${new Date().getTime()}&_=${rnd}`, {
-                        headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' }
-                    });
-                    
+                    const res = await fetch(`${CONFIG.GVIZ_URL}&t=${new Date().getTime()}&_=${Math.floor(Math.random()*99999)}`, { headers: { 'Cache-Control': 'no-cache' } });
                     if (!res.ok) throw new Error(res.statusText);
-                    
                     const text = await res.text();
-                    const jsonStr = text.substring(text.indexOf('(') + 1, text.lastIndexOf(')'));
-                    const json = JSON.parse(jsonStr);
+                    const json = JSON.parse(text.substring(text.indexOf('(') + 1, text.lastIndexOf(')')));
 
                     DOM.lastUpdated.textContent = `อัปเดต: ${new Date().toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})}`;
 
-                    if (!json.table || !json.table.rows) {
-                        State.allRows = [];
-                    } else {
-                        State.allRows = json.table.rows.map((r, i) => ({
-                            rowNumber: i + 2,
-                            formattedDate: r.c[0]?.f || 'N/A',
-                            phone: (r.c[1]?.v || 'N/A').replace(/'/g, ''),
-                            petName: r.c[2]?.v || 'N/A',
-                            appointmentType: r.c[3]?.v || 'N/A',
-                            smsMessage: r.c[5]?.v || ''
-                        })).reverse();
-                    }
+                    State.allRows = (!json.table || !json.table.rows) ? [] : json.table.rows.map((r, i) => ({
+                        rowNumber: i + 2, formattedDate: r.c[0]?.f || 'N/A', phone: (r.c[1]?.v || 'N/A').replace(/'/g, ''),
+                        petName: r.c[2]?.v || 'N/A', appointmentType: r.c[3]?.v || 'N/A', smsMessage: r.c[5]?.v || ''
+                    })).reverse();
                     UI.renderDashboard();
                 } catch (err) {
-                    console.error("Fetch Data Error:", err);
-                    DOM.dashboard.innerHTML = `<div class="text-center py-8 text-red-500"><i class="fa-solid fa-circle-exclamation text-2xl mb-2"></i><p>โหลดข้อมูลไม่สำเร็จ กรุณารีเฟรช</p></div>`;
+                    console.error(err); DOM.dashboard.innerHTML = `<div class="text-center py-8 text-red-500"><i class="fa-solid fa-circle-exclamation text-2xl mb-2"></i><p>โหลดข้อมูลไม่สำเร็จ กรุณารีเฟรช</p></div>`;
                 }
             },
 
-            submit: (data, loadingText, onSuccess, onError) => {
+            // Dual-Write Submit (Uses Promise.allSettled for reliability)
+            submit: async (data, loadingText, onSuccess, onError) => {
                 Swal.fire({ title: loadingText, allowOutsideClick: false, didOpen: Swal.showLoading });
                 
-                const cb = 'jsonp_' + Date.now();
-                const script = document.createElement('script');
-                
-                window[cb] = (res) => {
-                    script.remove(); delete window[cb]; Swal.close();
-                    setTimeout(() => {
-                        if (res.result === 'success') onSuccess();
-                        else {
-                            if (onError) onError();
-                            else Swal.fire('Error', res.error || 'Unknown Error', 'error');
-                        }
-                    }, 50);
-                };
+                try {
+                    const promises = [];
+                    // 1. ส่งเข้า SMS (หลัก)
+                    promises.push(Utils.fetchJSONP(CONFIG.SCRIPT_URL, data, 'smsSubmit', 20000));
+                    
+                    // 2. ส่งเข้า CDP (เฉพาะตอนสร้างใหม่)
+                    if (data.action === 'create') {
+                        promises.push(Utils.fetchJSONP(CONFIG.CDP_URL, { 
+                            action: 'addTransaction', phone: data.phoneNumber, petName: data.petName, 
+                            sendDate: data.sendDate, appointmentType: data.appointmentType 
+                        }, 'cdpSubmit', 15000));
+                    }
 
-                const params = new URLSearchParams({ callback: cb, ...data });
-                script.src = `${CONFIG.SCRIPT_URL}?${params}`;
-                script.onerror = () => { 
-                    Swal.fire('Error', 'Network Error', 'error'); 
-                    if(onError) onError(); 
-                };
-                document.body.appendChild(script);
+                    // รอให้ทั้งคู่ทำงานเสร็จ 
+                    const results = await Promise.allSettled(promises);
+                    
+                    // เช็คผลลัพธ์ของ SMS (index 0) เป็นหลัก
+                    const smsResult = results[0];
+                    if (smsResult.status === 'fulfilled' && smsResult.value.result === 'success') {
+                        Swal.close();
+                        setTimeout(() => onSuccess(), 50);
+                    } else {
+                        throw new Error(smsResult.value?.error || smsResult.reason?.message || 'SMS Submit Failed');
+                    }
+                    
+                    // Log CDP Error ถ้ามี แต่ไม่ขัดขวางการทำงานหลัก
+                    if (results[1] && results[1].status === 'rejected') {
+                        console.warn("Notice: CDP Transaction failed to save silently.", results[1].reason);
+                    }
+
+                } catch (error) {
+                    console.error("Submit Error:", error);
+                    Swal.fire('Error', error.message || 'Network Error', 'error');
+                    if(onError) onError();
+                }
             }
         };
 
         /**
          * ==========================================
-         * UI RENDERER
+         * UI RENDERING
          * ==========================================
          */
         const UI = {
@@ -649,138 +527,71 @@
                 const select = DOM.appointmentSelect;
                 select.innerHTML = '<option value="" disabled selected>กรุณาเลือกประเภทนัด...</option>';
                 CONFIG.APPOINTMENT_TYPES.forEach(appt => {
-                    const option = document.createElement('option');
-                    option.value = appt.value;
-                    option.textContent = appt.label;
+                    const option = document.createElement('option'); option.value = appt.value; option.textContent = appt.label;
                     select.appendChild(option);
                 });
             },
-
-            showSkeleton: () => {
-                DOM.dashboard.innerHTML = Array(2).fill(`
-                    <div class="border rounded-xl p-4 animate-pulse bg-white">
-                        <div class="flex justify-between mb-2"><div class="h-6 bg-gray-200 rounded w-1/3"></div><div class="h-6 bg-gray-200 rounded w-8"></div></div>
-                        <div class="h-4 bg-gray-200 rounded w-2/3 mb-2"></div>
-                        <div class="flex gap-4"><div class="h-4 bg-gray-200 rounded w-1/4"></div><div class="h-4 bg-gray-200 rounded w-1/4"></div></div>
-                    </div>`).join('');
-            },
-
+            showSkeleton: () => { DOM.dashboard.innerHTML = Array(2).fill(`<div class="border rounded-xl p-4 animate-pulse bg-white"><div class="flex justify-between mb-2"><div class="h-6 bg-gray-200 rounded w-1/3"></div><div class="h-6 bg-gray-200 rounded w-8"></div></div><div class="h-4 bg-gray-200 rounded w-2/3 mb-2"></div><div class="flex gap-4"><div class="h-4 bg-gray-200 rounded w-1/4"></div><div class="h-4 bg-gray-200 rounded w-1/4"></div></div></div>`).join(''); },
             getStatusBadge: (status) => {
-                switch(status) {
-                    case 'future': return `<span class="absolute top-3 right-3 bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-green-200">🟢 นัดพรุ่งนี้/อนาคต</span>`;
-                    case 'today': return `<span class="absolute top-3 right-3 bg-yellow-100 text-yellow-700 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-yellow-200">🟡 นัดวันนี้</span>`;
-                    default: return `<span class="absolute top-3 right-3 bg-gray-100 text-gray-600 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-gray-200">⚪ ผ่านมาแล้ว</span>`;
-                }
+                if(status === 'future') return `<span class="absolute top-3 right-3 bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-green-200">🟢 นัดพรุ่งนี้/อนาคต</span>`;
+                if(status === 'today') return `<span class="absolute top-3 right-3 bg-yellow-100 text-yellow-700 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-yellow-200">🟡 นัดวันนี้</span>`;
+                return `<span class="absolute top-3 right-3 bg-gray-100 text-gray-600 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-gray-200">⚪ ผ่านมาแล้ว</span>`;
             },
-
             generateCardHTML: (row) => {
-                const dateObj = Utils.toGregorian(row.formattedDate);
-                const status = Utils.getStatus(dateObj);
-                const statusBadge = UI.getStatusBadge(status);
+                const status = Utils.getStatus(Utils.toGregorian(row.formattedDate));
                 const msg = row.smsMessage || Utils.generateMessage(row.petName, row.appointmentType, row.formattedDate);
                 const isCopied = State.copiedRows.has(row.rowNumber);
-                const shortApptType = row.appointmentType.split(' คำแนะนำ')[0];
-
-                return `
-                    <div class="card p-4 relative hover:-translate-y-1 transition duration-200" 
-                            data-row="${row.rowNumber}" data-msg="${encodeURIComponent(msg)}"
-                            data-pet="${row.petName}" data-phone="${row.phone}" 
-                            data-type="${row.appointmentType}" data-date="${row.formattedDate}">
-                        ${statusBadge}
-                        <div class="flex justify-between items-start mb-1 mt-3">
-                            <h3 class="font-bold text-lg text-gray-800 pr-10">${row.petName}</h3>
+                return `<div class="card p-4 relative hover:-translate-y-1 transition duration-200" data-row="${row.rowNumber}" data-msg="${encodeURIComponent(msg)}" data-pet="${row.petName}" data-phone="${row.phone}" data-type="${row.appointmentType}" data-date="${row.formattedDate}">
+                            ${UI.getStatusBadge(status)}
+                            <div class="flex justify-between items-start mb-1 mt-3"><h3 class="font-bold text-lg text-gray-800 pr-10">${row.petName}</h3>
                             <div class="flex gap-1 absolute top-10 right-3 sm:static">
-                                <button class="action-btn ${isCopied ? 'copy-btn copied' : 'copy-btn'}" title="คัดลอก SMS">
-                                    <i class="${isCopied ? 'fa-solid fa-check' : 'fa-regular fa-copy'}"></i>
-                                </button>
+                                <button class="action-btn ${isCopied ? 'copy-btn copied' : 'copy-btn'}" title="คัดลอก SMS"><i class="${isCopied ? 'fa-solid fa-check' : 'fa-regular fa-copy'}"></i></button>
                                 <div class="w-px bg-gray-200 mx-1 h-6 self-center"></div>
                                 <button class="edit-btn action-btn text-gray-500 hover:text-blue-600"><i class="fa-solid fa-pencil"></i></button>
                                 <button class="delete-btn action-btn text-gray-500 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
-                            </div>
-                        </div>
-                        <p class="text-sm text-gray-600 mb-1"><i class="fa-solid fa-syringe w-4 text-center mr-1"></i> ${shortApptType}</p>
-                        <div class="flex text-sm text-gray-500 gap-4">
-                            <span><i class="fa-solid fa-mobile-screen-button w-4 text-center mr-1"></i>${row.phone}</span>
-                            <span><i class="fa-solid fa-calendar-days w-4 text-center mr-1"></i>${row.formattedDate}</span>
-                        </div>
-                    </div>`;
+                            </div></div>
+                            <p class="text-sm text-gray-600 mb-1"><i class="fa-solid fa-syringe w-4 text-center mr-1"></i> ${row.appointmentType.split(' คำแนะนำ')[0]}</p>
+                            <div class="flex text-sm text-gray-500 gap-4"><span><i class="fa-solid fa-mobile-screen-button w-4 text-center mr-1"></i>${row.phone}</span><span><i class="fa-solid fa-calendar-days w-4 text-center mr-1"></i>${row.formattedDate}</span></div>
+                        </div>`;
             },
-
             renderDashboard: () => {
-                let rows = State.allRows;
-                const today = new Date(); 
-                today.setHours(0,0,0,0);
-
-                if (State.currentFilter === 'today') {
-                    rows = rows.filter(r => {
-                        const d = Utils.toGregorian(r.formattedDate);
-                        return d && d.getTime() === today.getTime();
-                    });
-                } else if (State.currentFilter === 'tomorrow') {
-                    const tmr = new Date(today); tmr.setDate(tmr.getDate() + 1);
-                    rows = rows.filter(r => {
-                        const d = Utils.toGregorian(r.formattedDate);
-                        return d && d.getTime() === tmr.getTime();
-                    });
-                }
-
+                let rows = State.allRows; const today = new Date(); today.setHours(0,0,0,0);
+                if (State.currentFilter === 'today') rows = rows.filter(r => Utils.toGregorian(r.formattedDate)?.getTime() === today.getTime());
+                else if (State.currentFilter === 'tomorrow') { const tmr = new Date(today); tmr.setDate(tmr.getDate() + 1); rows = rows.filter(r => Utils.toGregorian(r.formattedDate)?.getTime() === tmr.getTime()); }
                 const term = DOM.searchInput.value.trim().toLowerCase();
-                if (term) {
-                    rows = rows.filter(r => r.petName.toLowerCase().includes(term) || r.phone.includes(term));
-                }
-
-                DOM.resultCount.textContent = `${rows.length} รายการ`;
-                DOM.resultCount.classList.remove('hidden');
-
-                if (rows.length === 0) {
-                    DOM.dashboard.innerHTML = `<div class="text-center py-8 text-gray-400 opacity-70"><i class="fa-solid fa-folder-open text-4xl mb-2"></i><p>ไม่พบข้อมูล</p></div>`;
-                    return;
-                }
-
-                const displayRows = (term || State.currentFilter !== 'all') ? rows : rows.slice(0, 3);
-                DOM.dashboard.innerHTML = `<div class="space-y-3">${displayRows.map(UI.generateCardHTML).join('')}</div>`;
+                if (term) rows = rows.filter(r => r.petName.toLowerCase().includes(term) || r.phone.includes(term));
+                
+                DOM.resultCount.textContent = `${rows.length} รายการ`; DOM.resultCount.classList.remove('hidden');
+                if (rows.length === 0) { DOM.dashboard.innerHTML = `<div class="text-center py-8 text-gray-400 opacity-70"><i class="fa-solid fa-folder-open text-4xl mb-2"></i><p>ไม่พบข้อมูล</p></div>`; return; }
+                DOM.dashboard.innerHTML = `<div class="space-y-3">${(term || State.currentFilter !== 'all' ? rows : rows.slice(0, 3)).map(UI.generateCardHTML).join('')}</div>`;
             },
-
             updateFormState: () => {
                 const { isEditing } = State;
-                DOM.formHeader.icon.className = isEditing ? 'fa-solid fa-pencil mr-3 text-amber-500' : 'fa-solid fa-file-pen mr-3 text-blue-600';
+                DOM.formHeader.icon.className = `fa-solid ${isEditing ? 'fa-pencil text-amber-500' : 'fa-file-pen text-blue-600'} mr-3`;
                 DOM.formHeader.title.textContent = isEditing ? 'แก้ไขข้อมูล' : 'สร้างข้อความแจ้งเตือน';
-                
-                DOM.submitBtn.className = isEditing 
-                    ? 'bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg flex items-center justify-center w-full transition'
-                    : 'bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg flex items-center justify-center w-full transition';
-                
+                DOM.submitBtn.className = `${isEditing ? 'bg-amber-500 hover:bg-amber-600' : 'bg-blue-600 hover:bg-blue-700'} text-white font-bold py-3 px-4 rounded-lg shadow-lg flex items-center justify-center w-full transition`;
                 DOM.submitBtnEl.text.textContent = isEditing ? 'อัปเดตข้อมูล' : 'บันทึก';
-                DOM.submitBtnEl.icon.className = isEditing ? 'fa-solid fa-floppy-disk mr-2' : 'fa-solid fa-paper-plane mr-2';
+                DOM.submitBtnEl.icon.className = `fa-solid ${isEditing ? 'fa-floppy-disk' : 'fa-paper-plane'} mr-2`;
                 DOM.clearBtnText.textContent = isEditing ? 'ยกเลิก' : 'ล้างฟอร์ม';
-                
-                if (isEditing) {
-                    DOM.saveAndAddBtn.classList.add('hidden');
-                    DOM.buttonsContainer.classList.remove('sm:grid-cols-3');
-                    DOM.buttonsContainer.classList.add('sm:grid-cols-2');
-                } else {
-                    DOM.saveAndAddBtn.classList.remove('hidden');
-                    DOM.buttonsContainer.classList.add('sm:grid-cols-3');
-                    DOM.buttonsContainer.classList.remove('sm:grid-cols-2');
-                }
-                
+                DOM.saveAndAddBtn.classList.toggle('hidden', isEditing);
+                DOM.buttonsContainer.className = `pt-4 grid gap-3 ${isEditing ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-3'}`;
                 Validation.check();
             }
         };
 
         /**
          * ==========================================
-         * APPLICATION LOGIC & HANDLERS
+         * APPLICATION CONTROLLER
          * ==========================================
          */
         const App = {
-            init: () => {
+            init: () => { 
                 UI.renderAppointmentOptions(); 
-                App.bindEvents();
-                Validation.check();
-                API.fetchData();
+                App.bindEvents(); 
+                Validation.check(); 
+                API.fetchData(); 
             },
-
+            
             bindEvents: () => {
                 DOM.form.addEventListener('submit', (e) => App.handleSubmit(e, false));
                 DOM.clearBtn.addEventListener('click', App.resetForm);
@@ -792,158 +603,55 @@
                 DOM.add1DayBtn.addEventListener('click', () => Utils.addDays(1));
                 DOM.add2DayBtn.addEventListener('click', () => Utils.addDays(2));
 
-                DOM.aiFillBtn.addEventListener('click', () => {
-                    const text = DOM.aiInput.value.trim();
-                    if(text) AIService.processText(text);
-                });
+                DOM.aiFillBtn.addEventListener('click', App.handleAIPromptClick);
+                DOM.promptChips.forEach(chip => chip.addEventListener('click', App.handleAIPromptChipClick));
+                DOM.quickApptBtns.forEach(btn => btn.addEventListener('click', App.handleQuickApptClick));
+                DOM.filters.forEach(btn => btn.addEventListener('click', (e) => App.handleFilter(e.target.dataset.filter)));
                 
-                DOM.promptChips.forEach(chip => {
-                    chip.addEventListener('click', (e) => {
-                        const currentText = DOM.aiInput.value.trim();
-                        const appendText = e.target.textContent;
-                        DOM.aiInput.value = currentText ? `${currentText} ${appendText}` : appendText;
-                        DOM.aiInput.focus();
-                    });
-                });
-                
-                DOM.quickApptBtns.forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const targetBtn = e.target.closest('.quick-appt-btn');
-                        if (targetBtn && targetBtn.dataset.val) {
-                            DOM.appointmentSelect.value = targetBtn.dataset.val;
-                            Validation.check();
-                        }
-                    });
-                });
-
-                DOM.filters.forEach(btn => btn.addEventListener('click', () => App.handleFilter(btn.dataset.filter)));
-                
-                // Form Inputs
-                DOM.phoneInput.addEventListener('input', (e) => {
-                    let val = e.target.value.replace(/[^0-9]/g, '');
-                    e.target.value = val;
-                    
-                    // เรียกค้นหาข้อมูล CDP อัตโนมัติเมื่อครบ 10 หลัก
-                    if (val.length === 10) {
-                        CDPService.searchByPhone(val);
-                    } else {
-                        DOM.customerInfoContainer.classList.add('hidden');
-                        DOM.petTagsContainer.classList.add('hidden');
-                    }
-                    
-                    App.handleAutocomplete(e.target, 'phone');
-                });
-                
-                DOM.petInput.addEventListener('input', (e) => App.handleAutocomplete(e.target, 'pet'));
+                DOM.phoneInput.addEventListener('input', App.handlePhoneInput);
+                DOM.petInput.addEventListener('input', App.handlePetInput);
                 DOM.appointmentSelect.addEventListener('change', Validation.check);
-                
-                document.addEventListener('click', (e) => {
-                    if(!e.target.closest('.input-with-icon')) {
-                        Object.values(DOM.suggestions).forEach(el => el.style.display = 'none');
-                    }
-                });
             },
 
-            handleSubmit: (e, isAddAnother = false) => {
-                if(e) e.preventDefault();
-                
-                Validation.check();
-                if (DOM.submitBtn.disabled) return;
+            // --- Event Handlers Extracted for Cleanliness ---
 
-                const formData = {
-                    action: State.isEditing ? 'update' : 'create',
-                    petName: DOM.petInput.value.trim(),
-                    phoneNumber: DOM.phoneInput.value.trim(),
-                    appointmentType: DOM.appointmentSelect.value,
-                    sendDate: Utils.toBuddhistEra(DOM.sendDateInput.value),
-                    rowNumber: State.editingRowNumber
-                };
-
-                if (!State.isEditing) {
-                    const isDup = State.allRows.some(r => r.petName === formData.petName && r.formattedDate === formData.sendDate);
-                    if (isDup) {
-                        Swal.fire({
-                            title: 'พบข้อมูลซ้ำ!', 
-                            text: `มีน้อง ${formData.petName} วันที่ ${formData.sendDate} แล้ว ยืนยันบันทึก?`,
-                            icon: 'warning', 
-                            showCancelButton: true, 
-                            confirmButtonText: 'ยืนยัน', 
-                            cancelButtonText: 'ยกเลิก'
-                        }).then((res) => {
-                            if (res.isConfirmed) API.submit(formData, 'กำลังบันทึก...', () => App.onSaveSuccess(isAddAnother));
-                        });
-                        return;
-                    }
-                }
-                
-                API.submit(formData, State.isEditing ? 'กำลังอัปเดต...' : 'กำลังบันทึก...', () => App.onSaveSuccess(isAddAnother));
+            handleAIPromptClick: () => { 
+                const text = DOM.aiInput.value.trim(); 
+                if(text) AIService.processText(text); 
             },
 
-            onSaveSuccess: (isAddAnother) => {
-                Toast.fire({ icon: 'success', title: State.isEditing ? 'อัปเดตเรียบร้อย' : 'บันทึกเรียบร้อย' });
-                
-                if (isAddAnother && !State.isEditing) {
-                    DOM.petInput.value = '';
-                    DOM.petInput.focus();
-                    Validation.check();
-                } else {
-                    App.resetForm();
-                }
-                
-                API.fetchData();
+            handleAIPromptChipClick: (e) => {
+                const currentText = DOM.aiInput.value.trim(); 
+                DOM.aiInput.value = currentText ? `${currentText} ${e.target.textContent}` : e.target.textContent; 
+                DOM.aiInput.focus();
             },
 
-            handleDashboardClick: (e) => {
-                const card = e.target.closest('.card');
-                if (!card) return;
-                
-                const copyBtn = e.target.closest('.copy-btn');
-                if (copyBtn) {
-                    Utils.copyText(decodeURIComponent(card.dataset.msg), copyBtn, parseInt(card.dataset.row));
-                    return;
-                }
-                
-                if (e.target.closest('.edit-btn')) {
-                    State.isEditing = true;
-                    State.editingRowNumber = card.dataset.row;
-                    DOM.petInput.value = card.dataset.pet;
-                    DOM.phoneInput.value = card.dataset.phone;
-                    DOM.appointmentSelect.value = card.dataset.type;
-                    const gDate = Utils.toGregorian(card.dataset.date);
-                    if(gDate) datePicker.setDate(gDate);
-                    UI.updateFormState();
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                    return;
-                }
-
-                if (e.target.closest('.delete-btn')) {
-                    const row = parseInt(card.dataset.row);
-                    Swal.fire({
-                        title: 'ลบข้อมูล?', icon: 'warning', showCancelButton: true,
-                        confirmButtonColor: '#d33', confirmButtonText: 'ลบเลย', cancelButtonText: 'ยกเลิก'
-                    }).then((res) => {
-                        if (res.isConfirmed) {
-                            API.submit({ action: 'delete', rowNumber: row }, 'กำลังลบ...', () => {
-                                State.allRows = State.allRows.filter(r => r.rowNumber != row);
-                                State.allRows.forEach(r => { if(r.rowNumber > row) r.rowNumber--; });
-                                UI.renderDashboard();
-                                Toast.fire({ icon: 'success', title: 'ลบข้อมูลแล้ว' });
-                            }, () => API.fetchData());
-                        }
-                    });
+            handleQuickApptClick: (e) => {
+                const targetBtn = e.target.closest('.quick-appt-btn');
+                if (targetBtn && targetBtn.dataset.val) { 
+                    DOM.appointmentSelect.value = targetBtn.dataset.val; 
+                    Validation.check(); 
                 }
             },
 
-            handleFilter: (type) => {
-                State.currentFilter = type;
-                DOM.filters.forEach(btn => {
-                    const isActive = btn.dataset.filter === type;
-                    btn.classList.toggle('active', isActive);
-                    btn.className = isActive 
-                        ? "filter-btn active px-4 py-2 rounded-full bg-blue-50 text-blue-600 border border-blue-200 text-sm font-medium whitespace-nowrap transition-colors"
-                        : "filter-btn px-4 py-2 rounded-full bg-white text-gray-600 border border-gray-200 text-sm font-medium whitespace-nowrap transition-colors hover:bg-gray-50";
-                });
-                UI.renderDashboard();
+            handlePhoneInput: (e) => {
+                let val = e.target.value.replace(/[^0-9]/g, ''); 
+                e.target.value = val;
+                
+                // ค้นหา CDP (เฉพาะกรอกครบ 10 หลัก)
+                if (val.length === 10) {
+                    CDPService.searchByPhone(val);
+                } else { 
+                    DOM.customerInfoContainer.classList.add('hidden'); 
+                    DOM.petTagsContainer.classList.add('hidden'); 
+                }
+                
+                // แนะนำคำ (Autocomplete) จากประวัติ SMS เดิม
+                App.handleAutocomplete(e.target, 'phone');
+            },
+
+            handlePetInput: (e) => {
+                App.handleAutocomplete(e.target, 'pet');
             },
 
             handleAutocomplete: (input, type) => {
@@ -951,10 +659,7 @@
                 const list = DOM.suggestions[type];
                 
                 Validation.check();
-                if (val.length < 2) { 
-                    list.style.display = 'none'; 
-                    return; 
-                }
+                if (val.length < 2) { list.style.display = 'none'; return; }
 
                 const seen = new Set();
                 const matches = State.allRows.filter(r => {
@@ -968,7 +673,7 @@
 
                 if (matches.length > 0) {
                     list.innerHTML = matches.slice(0, 5).map(r => `
-                        <div class="suggestion-item" onclick="App.fillForm('${r.petName.replace(/'/g, "\\'")}', '${r.phone}')">
+                        <div class="suggestion-item" onclick="App.fillFormFromAutocomplete('${r.petName.replace(/'/g, "\\'")}', '${r.phone}')">
                             <span class="font-semibold text-gray-800">${type === 'phone' ? r.phone : r.petName}</span>
                             <span class="text-sm text-gray-500">${type === 'phone' ? r.petName : r.phone}</span>
                         </div>`).join('');
@@ -978,34 +683,109 @@
                 }
             },
 
-            fillForm: (pet, phone) => {
+            // --- Form Actions ---
+
+            handleSubmit: (e, isAddAnother = false) => {
+                if(e) e.preventDefault(); 
+                Validation.check(); 
+                if (DOM.submitBtn.disabled) return;
+
+                const formData = { 
+                    action: State.isEditing ? 'update' : 'create', 
+                    petName: DOM.petInput.value.trim(), 
+                    phoneNumber: DOM.phoneInput.value.trim(), 
+                    appointmentType: DOM.appointmentSelect.value, 
+                    sendDate: Utils.toBuddhistEra(DOM.sendDateInput.value), 
+                    rowNumber: State.editingRowNumber 
+                };
+
+                if (!State.isEditing && State.allRows.some(r => r.petName === formData.petName && r.formattedDate === formData.sendDate)) {
+                    Swal.fire({ title: 'พบข้อมูลซ้ำ!', text: `มีน้อง ${formData.petName} วันที่ ${formData.sendDate} แล้ว ยืนยันบันทึก?`, icon: 'warning', showCancelButton: true, confirmButtonText: 'ยืนยัน', cancelButtonText: 'ยกเลิก' })
+                        .then((res) => { if (res.isConfirmed) API.submit(formData, 'กำลังบันทึก...', () => App.onSaveSuccess(isAddAnother)); });
+                    return;
+                }
+                API.submit(formData, State.isEditing ? 'กำลังอัปเดต...' : 'กำลังบันทึก...', () => App.onSaveSuccess(isAddAnother));
+            },
+
+            onSaveSuccess: (isAddAnother) => {
+                Toast.fire({ icon: 'success', title: State.isEditing ? 'อัปเดตเรียบร้อย' : 'บันทึกเรียบร้อย' });
+                if (isAddAnother && !State.isEditing) { 
+                    DOM.petInput.value = ''; 
+                    DOM.petInput.focus(); 
+                    Validation.check(); 
+                } else {
+                    App.resetForm();
+                }
+                API.fetchData();
+            },
+
+            handleDashboardClick: (e) => {
+                const card = e.target.closest('.card'); if (!card) return;
+                const copyBtn = e.target.closest('.copy-btn'); 
+                if (copyBtn) return Utils.copyText(decodeURIComponent(card.dataset.msg), copyBtn, parseInt(card.dataset.row));
+                
+                if (e.target.closest('.edit-btn')) {
+                    State.isEditing = true; State.editingRowNumber = card.dataset.row;
+                    DOM.petInput.value = card.dataset.pet; 
+                    DOM.phoneInput.value = card.dataset.phone; 
+                    DOM.appointmentSelect.value = card.dataset.type;
+                    const gDate = Utils.toGregorian(card.dataset.date); 
+                    if(gDate) datePicker.setDate(gDate);
+                    UI.updateFormState(); window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else if (e.target.closest('.delete-btn')) {
+                    const row = parseInt(card.dataset.row);
+                    Swal.fire({ title: 'ลบข้อมูล?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'ลบเลย', cancelButtonText: 'ยกเลิก' })
+                        .then((res) => { 
+                            if (res.isConfirmed) API.submit({ action: 'delete', rowNumber: row }, 'กำลังลบ...', () => {
+                                State.allRows = State.allRows.filter(r => r.rowNumber != row); 
+                                State.allRows.forEach(r => { if(r.rowNumber > row) r.rowNumber--; });
+                                UI.renderDashboard(); 
+                                Toast.fire({ icon: 'success', title: 'ลบข้อมูลแล้ว' });
+                            }, () => API.fetchData()); 
+                        });
+                }
+            },
+
+            handleFilter: (type) => {
+                State.currentFilter = type;
+                DOM.filters.forEach(btn => {
+                    const isActive = btn.dataset.filter === type; btn.classList.toggle('active', isActive);
+                    btn.className = isActive ? "filter-btn active px-4 py-2 rounded-full bg-blue-50 text-blue-600 border border-blue-200 text-sm font-medium whitespace-nowrap transition-colors" : "filter-btn px-4 py-2 rounded-full bg-white text-gray-600 border border-gray-200 text-sm font-medium whitespace-nowrap transition-colors hover:bg-gray-50";
+                }); 
+                UI.renderDashboard();
+            },
+
+            // ใช้เติมข้อมูลเมื่อกดเลือกจาก Dropdown เบอร์เก่า
+            fillFormFromAutocomplete: (pet, phone) => {
                 DOM.petInput.value = pet;
                 DOM.phoneInput.value = phone;
                 Object.values(DOM.suggestions).forEach(el => el.style.display = 'none');
                 Validation.check();
-                // เมื่อเลือกจากประวัติเก่า ให้ค้นหา CDP ด้วยเลย
                 if(phone && phone.length === 10) CDPService.searchByPhone(phone);
             },
-            
-            fillPetName: (pet) => {
-                DOM.petInput.value = pet;
+
+            // ใช้เติมข้อมูลเมื่อกดเลือกแท็ก CDP 
+            fillPetName: (pet, focus = true) => { 
+                DOM.petInput.value = pet; 
                 Object.values(DOM.suggestions).forEach(el => el.style.display = 'none');
-                Validation.check();
-                DOM.petInput.focus();
+                Validation.check(); 
+                if(focus) DOM.petInput.focus(); 
             },
 
             resetForm: () => {
-                State.isEditing = false;
-                State.editingRowNumber = null;
-                DOM.form.reset();
-                datePicker.setDate(new Date());
-                DOM.customerInfoContainer.classList.add('hidden');
-                DOM.petTagsContainer.classList.add('hidden');
+                State.isEditing = false; State.editingRowNumber = null; 
+                DOM.form.reset(); datePicker.setDate(new Date());
+                DOM.customerInfoContainer.classList.add('hidden'); 
+                DOM.petTagsContainer.classList.add('hidden'); 
+                Object.values(DOM.suggestions).forEach(el => el.style.display = 'none');
                 UI.updateFormState();
             }
         };
 
-        window.App = App;
+        // Expose globally for HTML onclick handlers
+        window.App = App; 
+        
+        // Let's go!
         App.init();
 
     </script>
