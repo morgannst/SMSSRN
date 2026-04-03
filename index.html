@@ -337,7 +337,24 @@
             },
             generateMessage: (pet, type, date) => {
                 const appt = type.split(' คำแนะนำ')[0];
-                return `แจ้งเตือนนัดหมายน้อง ${pet} วันพรุ่งนี้ (${date})\nนัด : ${appt}${CONFIG.SMS_FOOTER}`;
+                
+                // ตรวจสอบเพื่อเพิ่มคำแนะนำพิเศษ
+                let advice = "";
+                if (appt.includes("วัคซีน")) {
+                    advice = "\nคำแนะนำ: งดอาบน้ำและสังเกตอาการหลังฉีดวัคซีน 7 วัน";
+                } else if (appt.includes("ทำหมัน")) {
+                    advice = "\nคำแนะนำ: งดน้ำและอาหารอย่างน้อย 6 ชั่วโมง ก่อนทำหมัน";
+                }
+
+                // เลือกอีโมจิให้เข้ากับประเภทสัตว์
+                let petEmoji = "🐾";
+                if (type.includes("แมว") || type.includes("ลิวคีเมีย") || type.includes("COMBO")) {
+                    petEmoji = "🐱";
+                } else if (type.includes("สุนัข") || type.includes("NEXGARD") || type.includes("BRAVECTO")) {
+                    petEmoji = "🐶";
+                }
+                
+                return `แจ้งเตือนนัดหมายน้อง ${pet} ${petEmoji} วันพรุ่งนี้ (${date})\nนัด : ${appt}${advice}${CONFIG.SMS_FOOTER}`;
             },
             copyText: (text, btn, rowNum) => {
                 const area = document.createElement('textarea'); area.value = text;
